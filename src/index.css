@@ -1,0 +1,43 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-white text-brand-900 antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display tracking-tight;
+  }
+}
+
+@layer components {
+  .container-wide {
+    @apply max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .hide-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .btn-primary {
+    @apply bg-brand-900 text-white px-6 py-3 rounded-none font-medium
+           hover:bg-brand-800 transition-colors duration-200
+           focus:outline-none focus:ring-2 focus:ring-brand-900 focus:ring-offset-2;
+  }
+
+  .btn-secondary {
+    @apply border border-brand-900 text-brand-900 px-6 py-3 rounded-none font-medium
+           hover:bg-brand-900 hover:text-white transition-colors duration-200
+           focus:outline-none focus:ring-2 focus:ring-brand-900 focus:ring-offset-2;
+  }
+}
