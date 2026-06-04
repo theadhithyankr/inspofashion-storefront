@@ -1,44 +1,39 @@
-# Inspo Fashion Storefront
+# Inspofashions Storefront
 
-React and Vite storefront for browsing Inspo Fashion collections, search, and product pages.
+Next.js storefront for a premium clothing brand with Supabase catalog data and WhatsApp-only checkout.
 
-## Key Features
-- React and Vite storefront for browsing Inspo Fashion collections, search, and product pages
-- Supabase integration is called out for the data, auth, or application state layer present in the codebase.
-- Organized UI components and screens make the main user flows visible from the project structure.
-- Existing media assets are referenced only where they are already present in the repository.
-- Package scripts provide reproducible development, build, and preview commands.
+## Features
+- Editorial mobile-first home page
+- SEO-friendly collection and product routes
+- Product image galleries, size/color selection, and cart persistence
+- WhatsApp checkout with validated customer details
+- No payment collection and no stored customer/order PII
+- Sitemap, robots, metadata, security headers, and Vercel-ready config
 
 ## Tech Stack
-- JavaScript/TypeScript
+- Next.js App Router
 - React
-- Vite
 - Tailwind CSS
 - Supabase
-- HTML/CSS
+- lucide-react
 
-## Project Structure
-- src/app or app - application routes, screens, and layout files.
-- components - reusable UI and workflow components.
-- public / assets - static images, icons, manifests, and visual assets.
-
-## Setup and Run
+## Local Development
 ```bash
-git clone https://github.com/theadhithyankr/inspofashion-storefront.git
-cd inspofashion-storefront
 npm install
+cp .env.example .env.local
 npm run dev
-npm run build
-npm run preview
 ```
 
-## Screenshots and Media
-- Existing asset: src/assets/hero.png
+Open `http://localhost:3000`.
 
-## What This Project Demonstrates
-- Building user-facing web applications with component-based UI and modern frontend tooling.
-- Integrating managed backend services for auth, persistence, realtime data, or app infrastructure.
-- Presenting project scope, setup, and technical choices clearly for reviewers and recruiters.
+## Production Build
+```bash
+npm run lint
+npm run build
+```
 
-## Repository
-- GitHub: https://github.com/theadhithyankr/inspofashion-storefront
+## Vercel
+- Root directory: `storefront`
+- Framework preset: Next.js
+- Build command: `npm run build`
+- Environment variables: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `NEXT_PUBLIC_SITE_URL`

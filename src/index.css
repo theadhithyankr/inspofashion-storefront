@@ -10,6 +10,18 @@
     @apply bg-white text-brand-900 antialiased;
   }
 
+  button,
+  a,
+  input,
+  textarea,
+  select {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6f1d1b] focus-visible:ring-offset-2;
+  }
+
+  ::selection {
+    @apply bg-[#6f1d1b] text-white;
+  }
+
   h1, h2, h3, h4, h5, h6 {
     @apply font-display tracking-tight;
   }
@@ -39,5 +51,34 @@
     @apply border border-brand-900 text-brand-900 px-6 py-3 rounded-none font-medium
            hover:bg-brand-900 hover:text-white transition-colors duration-200
            focus:outline-none focus:ring-2 focus:ring-brand-900 focus:ring-offset-2;
+  }
+}
+
+@keyframes slideInMenu {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInCart {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
