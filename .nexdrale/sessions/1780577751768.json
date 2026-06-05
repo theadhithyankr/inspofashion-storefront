@@ -1,0 +1,30 @@
+{
+  "sessionId": "1780577751768",
+  "messages": [
+    {
+      "id": "1780577829117-4569211a11dde8",
+      "role": "user",
+      "content": "hi",
+      "createdAt": 1780577829117
+    },
+    {
+      "id": "1780577829117-115ef7260ee138",
+      "role": "assistant",
+      "content": "",
+      "createdAt": 1780577829117
+    },
+    {
+      "id": "1780577893482-d944f8ed622b4",
+      "role": "user",
+      "content": "hi",
+      "createdAt": 1780577893482
+    },
+    {
+      "id": "1780577893482-165410489e19e",
+      "role": "assistant",
+      "content": "I'm Nexdrale, a pragmatic VS Code coding agent. I'm here to help your coding needs. What do you need help with today? Do you have a specific project or task in mind?",
+      "createdAt": 1780577893482
+    }
+  ],
+  "updatedAt": 1780577894204
+}
