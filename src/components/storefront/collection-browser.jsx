@@ -5,16 +5,19 @@ import { SlidersHorizontal, X } from 'lucide-react'
 import { ProductGrid } from './product-grid'
 
 export function CollectionBrowser({ products }) {
+  const [category, setCategory] = useState('All')
   const [size, setSize] = useState('All')
   const [color, setColor] = useState('All')
   const [sort, setSort] = useState('newest')
   const [filtersOpen, setFiltersOpen] = useState(false)
 
+  const categories = useMemo(() => ['All', ...Array.from(new Set(products.map((p) => p.category).filter(Boolean))).sort()], [products])
   const sizes = useMemo(() => ['All', ...Array.from(new Set(products.flatMap((p) => p.sizes || []))).sort()], [products])
   const colors = useMemo(() => ['All', ...Array.from(new Set(products.flatMap((p) => p.colors || []))).sort()], [products])
 
   const filtered = useMemo(() => {
     const next = products
+      .filter((product) => category === 'All' || product.category === category)
       .filter((product) => size === 'All' || product.sizes?.includes(size))
       .filter((product) => color === 'All' || product.colors?.includes(color))
 
@@ -23,12 +26,13 @@ export function CollectionBrowser({ products }) {
       if (sort === 'price-high') return Number(b.price) - Number(a.price)
       return new Date(b.created_at || 0) - new Date(a.created_at || 0)
     })
-  }, [products, size, color, sort])
+  }, [products, category, size, color, sort])
 
   const controls = (
     <div className="space-y-6">
+      <FilterGroup label="Category" options={categories} value={category} onChange={setCategory} />
       <FilterGroup label="Size" options={sizes} value={size} onChange={setSize} />
-      <FilterGroup label="Colour" options={colors} value={color} onChange={setColor} />
+      <ColorFilterGroup colors={colors} value={color} onChange={setColor} />
       <label className="block">
         <span className="mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-brand-500">Sort</span>
         <select value={sort} onChange={(event) => setSort(event.target.value)} className="w-full border border-brand-200 bg-white px-3 py-3">
@@ -79,6 +83,25 @@ function FilterGroup({ label, options, value, onChange }) {
       <span className="mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-brand-500">{label}</span>
       <div className="flex flex-wrap gap-2">
         {options.map((option) => (
+          <button
+            key={option}
+            onClick={() => onChange(option)}
+            className={`border px-3 py-2 text-sm ${value === option ? 'border-brand-900 bg-brand-900 text-white' : 'border-brand-200 bg-white text-brand-700'}`}
+          >
+            {option}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function ColorFilterGroup({ colors, value, onChange }) {
+  return (
+    <div>
+      <span className="mb-2 block text-xs font-bold uppercase tracking-[0.18em] text-brand-500">Colour</span>
+      <div className="flex flex-wrap gap-2">
+        {colors.map((option) => (
           <button
             key={option}
             onClick={() => onChange(option)}

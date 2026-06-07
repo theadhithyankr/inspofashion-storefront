@@ -39,7 +39,7 @@ export default async function RootLayout({ children }) {
   const data = await getStorefrontData()
 
   return (
-    <html lang="en" className={`${sans.variable} ${display.variable}`}>
+    <html lang="en" data-scroll-behavior="smooth" className={`${sans.variable} ${display.variable}`}>
       <body>
         <StorefrontShell data={data}>{children}</StorefrontShell>
       </body>

@@ -4,10 +4,19 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    /* Optimize mobile rendering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Prevent zoom on input focus on iOS */
+    font-size: 16px;
   }
 
   body {
     @apply bg-white text-brand-900 antialiased;
+    /* Improve mobile performance */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
   }
 
   button,
@@ -16,6 +25,12 @@
   textarea,
   select {
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6f1d1b] focus-visible:ring-offset-2;
+    /* Disable tap highlight on mobile */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  input, textarea, select {
+    @apply user-select-text;
   }
 
   ::selection {
@@ -45,12 +60,25 @@
     @apply bg-brand-900 text-white px-6 py-3 rounded-none font-medium
            hover:bg-brand-800 transition-colors duration-200
            focus:outline-none focus:ring-2 focus:ring-brand-900 focus:ring-offset-2;
+    /* Better mobile touch target (minimum 44px) */
+    min-height: 44px;
   }
 
   .btn-secondary {
     @apply border border-brand-900 text-brand-900 px-6 py-3 rounded-none font-medium
            hover:bg-brand-900 hover:text-white transition-colors duration-200
            focus:outline-none focus:ring-2 focus:ring-brand-900 focus:ring-offset-2;
+    /* Better mobile touch target (minimum 44px) */
+    min-height: 44px;
+  }
+
+  /* Smooth animations on mobile */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
@@ -82,3 +110,28 @@
     transform: translateY(0);
   }
 }
+
+/* Mobile-specific optimizations */
+@media (max-width: 768px) {
+  /* Reduce animation on mobile for better performance */
+  * {
+    scroll-behavior: auto !important;
+  }
+
+  /* Improve tap feedback */
+  button, a, [role="button"] {
+    position: relative;
+  }
+
+  /* Prevent layout shift on scroll */
+  html {
+    overflow-y: scroll;
+  }
+
+  /* Optimize images on mobile */
+  img {
+    -webkit-user-drag: none;
+    pointer-events: none;
+  }
+}
+

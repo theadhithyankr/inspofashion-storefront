@@ -22,6 +22,11 @@ export function ProductPurchasePanel({ product }) {
   }, [totalItems])
 
   const add = () => {
+    if (product.is_sold_out) {
+      setError('This product is sold out.')
+      return false
+    }
+
     if (!size) {
       setError('Choose a size before adding this piece.')
       return false
@@ -37,6 +42,11 @@ export function ProductPurchasePanel({ product }) {
 
   return (
     <div className="lg:sticky lg:top-28">
+      {product.is_sold_out && (
+        <div className="mb-6 border border-orange-300 bg-orange-50 px-4 py-3">
+          <p className="text-sm font-semibold text-orange-900">This product is currently sold out.</p>
+        </div>
+      )}
       <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-500">{product.category}</p>
       <h1 className="mt-3 font-display text-4xl leading-tight text-brand-900 sm:text-5xl">{product.title}</h1>
       <div className="mt-4 flex items-baseline gap-3">
@@ -75,13 +85,17 @@ export function ProductPurchasePanel({ product }) {
 
       {product.colors?.length > 0 && (
         <div className="mt-6">
-          <span className="mb-3 block text-sm font-bold uppercase tracking-[0.16em]">Colour</span>
+          <div className="mb-3 flex items-center justify-between">
+            <span className="text-sm font-bold uppercase tracking-[0.16em]">Colour</span>
+            {color && <span className="text-sm font-semibold text-brand-600">{color}</span>}
+          </div>
           <div className="flex flex-wrap gap-2">
             {product.colors.map((option) => (
               <button
                 key={option}
                 onClick={() => setColor(option)}
-                className={`border px-4 py-2 text-sm font-semibold ${color === option ? 'border-brand-900 bg-brand-900 text-white' : 'border-brand-200 bg-white text-brand-900 hover:border-brand-900'}`}
+                disabled={product.is_sold_out}
+                className={`border px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50 ${color === option ? 'border-brand-900 bg-brand-900 text-white' : 'border-brand-200 bg-white text-brand-900 hover:border-brand-900'}`}
               >
                 {option}
               </button>
@@ -93,25 +107,44 @@ export function ProductPurchasePanel({ product }) {
       <div className="mt-6">
         <span className="mb-3 block text-sm font-bold uppercase tracking-[0.16em]">Quantity</span>
         <div className="flex w-fit items-center border border-brand-200">
-          <button className="p-3" onClick={() => setQuantity(Math.max(1, quantity - 1))} aria-label="Decrease quantity">
+          <button 
+            className="p-3 transition hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-50" 
+            onClick={() => setQuantity(Math.max(1, quantity - 1))} 
+            aria-label="Decrease quantity"
+            disabled={product.is_sold_out}
+          >
             <Minus className="h-4 w-4" />
           </button>
           <span className="w-12 text-center font-semibold">{quantity}</span>
-          <button className="p-3" onClick={() => setQuantity(quantity + 1)} aria-label="Increase quantity">
+          <button 
+            className="p-3 transition hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-50" 
+            onClick={() => setQuantity(quantity + 1)} 
+            aria-label="Increase quantity"
+            disabled={product.is_sold_out}
+          >
             <Plus className="h-4 w-4" />
           </button>
         </div>
       </div>
 
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-brand-200 bg-white/95 p-3 shadow-[0_-12px_40px_rgba(28,25,23,0.08)] backdrop-blur lg:static lg:mt-8 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none">
-        <button
-          onClick={add}
-          className={`flex w-full items-center justify-center gap-2 px-6 py-4 font-bold uppercase tracking-[0.16em] text-white transition duration-300 ${added ? 'bg-[#102820]' : 'bg-brand-900 hover:bg-brand-800'}`}
-          aria-live="polite"
-        >
-          <ShoppingBag className="h-5 w-5" />
-          {added ? 'Added to bag' : `Add to bag - ${formatPrice(Number(product.price) * quantity)}`}
-        </button>
+        {product.is_sold_out ? (
+          <button
+            disabled
+            className="flex w-full items-center justify-center gap-2 px-6 py-4 font-bold uppercase tracking-[0.16em] text-white bg-brand-300 cursor-not-allowed"
+          >
+            Sold Out
+          </button>
+        ) : (
+          <button
+            onClick={add}
+            className={`flex w-full items-center justify-center gap-2 px-6 py-4 font-bold uppercase tracking-[0.16em] text-white transition duration-300 ${added ? 'bg-[#102820]' : 'bg-brand-900 hover:bg-brand-800'}`}
+            aria-live="polite"
+          >
+            <ShoppingBag className="h-5 w-5" />
+            {added ? 'Added to bag' : `Add to bag - ${formatPrice(Number(product.price) * quantity)}`}
+          </button>
+        )}
         {added && <p className="mt-2 text-center text-xs font-semibold uppercase tracking-[0.16em] text-[#102820]">Opening your bag...</p>}
       </div>
 
