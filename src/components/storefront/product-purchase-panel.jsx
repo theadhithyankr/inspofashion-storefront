@@ -5,15 +5,24 @@ import { Minus, Plus, ShoppingBag } from 'lucide-react'
 import { formatPrice } from '@/lib/format'
 import { useCart } from './cart-context'
 
-export function ProductPurchasePanel({ product }) {
+export function ProductPurchasePanel({ product, selectedColor, onColorChange }) {
   const availableSizes = useMemo(() => product.sizes?.filter(Boolean) || [], [product.sizes])
   const [size, setSize] = useState(availableSizes[0] || 'One Size')
-  const [color, setColor] = useState(product.colors?.[0] || '')
   const [quantity, setQuantity] = useState(1)
   const [error, setError] = useState('')
   const [added, setAdded] = useState(false)
   const openCartAtCountRef = useRef(null)
   const { addToCart, totalItems } = useCart()
+
+  // Use selectedColor from props, fallback to first color
+  const color = selectedColor || product.colors?.[0] || ''
+
+  // Handle color change - call parent callback
+  const handleColorChange = (newColor) => {
+    if (onColorChange) {
+      onColorChange(newColor)
+    }
+  }
 
   useEffect(() => {
     if (!openCartAtCountRef.current || totalItems < openCartAtCountRef.current) return
@@ -47,6 +56,7 @@ export function ProductPurchasePanel({ product }) {
           <p className="text-sm font-semibold text-orange-900">This product is currently sold out.</p>
         </div>
       )}
+
       <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-500">{product.category}</p>
       <h1 className="mt-3 font-display text-4xl leading-tight text-brand-900 sm:text-5xl">{product.title}</h1>
       <div className="mt-4 flex items-baseline gap-3">
@@ -56,6 +66,28 @@ export function ProductPurchasePanel({ product }) {
         )}
       </div>
       {product.description && <p className="mt-6 leading-7 text-brand-600">{product.description}</p>}
+
+      {/* Color Variant Switcher - Mobile */}
+      {product.colors && product.colors.length > 1 && (
+        <div className="lg:hidden mt-6 p-3 border border-brand-200 rounded-sm bg-brand-50">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-brand-500 mb-2">Colors</p>
+          <div className="flex flex-wrap gap-2 mb-2">
+            {product.colors.map((colorOption) => (
+              <ColorSwatch
+                key={colorOption}
+                color={colorOption}
+                isSelected={color === colorOption}
+                isOutOfStock={product.color_stock?.[colorOption] === 0}
+                onClick={() => handleColorChange(colorOption)}
+                size="small"
+              />
+            ))}
+          </div>
+          {color && (
+            <p className="text-xs font-semibold text-brand-900">Selected: <span className="text-brand-700">{color}</span></p>
+          )}
+        </div>
+      )}
 
       <div className="mt-8">
         <div className="mb-3 flex items-center justify-between">
@@ -82,27 +114,6 @@ export function ProductPurchasePanel({ product }) {
           </p>
         )}
       </div>
-
-      {product.colors?.length > 0 && (
-        <div className="mt-6">
-          <div className="mb-3 flex items-center justify-between">
-            <span className="text-sm font-bold uppercase tracking-[0.16em]">Colour</span>
-            {color && <span className="text-sm font-semibold text-brand-600">{color}</span>}
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {product.colors.map((option) => (
-              <button
-                key={option}
-                onClick={() => setColor(option)}
-                disabled={product.is_sold_out}
-                className={`border px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50 ${color === option ? 'border-brand-900 bg-brand-900 text-white' : 'border-brand-200 bg-white text-brand-900 hover:border-brand-900'}`}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
 
       <div className="mt-6">
         <span className="mb-3 block text-sm font-bold uppercase tracking-[0.16em]">Quantity</span>
@@ -157,6 +168,65 @@ export function ProductPurchasePanel({ product }) {
   )
 }
 
+function ColorSwatch({ color, isSelected, isOutOfStock, onClick, size = 'large' }) {
+  const colorHex = getColorHex(color)
+  const isMobile = size === 'small'
+
+  return (
+    <button
+      onClick={onClick}
+      disabled={isOutOfStock}
+      className="group relative flex flex-col items-center gap-1.5 transition disabled:cursor-not-allowed"
+      title={isOutOfStock ? `${color} - Out of stock` : color}
+    >
+      {/* Swatch Circle */}
+      <div className={`relative transition-all ${isMobile ? 'h-8 w-8' : 'h-12 w-12'}`}>
+        <div
+          className={`absolute inset-0 rounded-full border-2 transition-all ${
+            isOutOfStock
+              ? 'border-gray-300 opacity-40'
+              : isSelected
+              ? 'border-brand-900 ring-2 ring-brand-900/20'
+              : 'border-brand-200 hover:border-brand-900'
+          }`}
+          style={{
+            backgroundColor: isOutOfStock ? '#f3f4f6' : colorHex,
+          }}
+        />
+
+        {/* Selected Indicator */}
+        {isSelected && !isOutOfStock && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="h-2 w-2 rounded-full bg-white" />
+          </div>
+        )}
+
+        {/* Out of Stock Strikethrough */}
+        {isOutOfStock && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="h-0.5 w-2/3 bg-gray-400 rotate-45" />
+          </div>
+        )}
+      </div>
+
+      {/* Color Label */}
+      <span className={`font-medium transition ${
+        isMobile 
+          ? 'text-[10px]' 
+          : 'text-xs'
+      } ${
+        isOutOfStock
+          ? 'text-gray-400'
+          : isSelected
+          ? 'text-brand-900'
+          : 'text-brand-700 group-hover:text-brand-900'
+      }`}>
+        {color}
+      </span>
+    </button>
+  )
+}
+
 function InfoRow({ label, value }) {
   return (
     <div className="py-4">
@@ -164,4 +234,18 @@ function InfoRow({ label, value }) {
       <p className="mt-2 leading-6 text-brand-700">{value}</p>
     </div>
   )
+}
+
+function getColorHex(colorName) {
+  const colorMap = {
+    'red': '#dc2626', 'blue': '#2563eb', 'green': '#16a34a', 'yellow': '#eab308',
+    'orange': '#ea580c', 'purple': '#9333ea', 'pink': '#ec4899', 'black': '#1f2937',
+    'white': '#f5f5f5', 'gray': '#6b7280', 'grey': '#6b7280', 'brown': '#92400e',
+    'beige': '#dcc8a3', 'navy': '#001f3f', 'cream': '#fffdd0', 'gold': '#fbbf24',
+    'silver': '#d1d5db', 'bronze': '#b45309', 'copper': '#b7410e', 'rose': '#fb7185',
+    'maroon': '#800000', 'coral': '#ff7f50', 'teal': '#14b8a6', 'mint': '#a7f3d0',
+    'sage': '#c4b5a0', 'khaki': '#f0e68c', 'olive': '#808000', 'tan': '#d2b48c',
+    'peach': '#ffbe98', 'lavender': '#e6e6fa', 'indigo': '#4b0082',
+  }
+  return colorMap[colorName?.toLowerCase()] || '#e5e7eb'
 }
