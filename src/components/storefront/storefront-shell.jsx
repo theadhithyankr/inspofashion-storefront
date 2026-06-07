@@ -64,35 +64,35 @@ function Header({ menu, general, products, collections, onCartClick }) {
 
   return (
     <>
-      <div className="bg-brand-900 px-4 py-2 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-white">
+      <div className="bg-brand-900 px-3 py-1.5 text-center text-[9px] sm:text-[11px] font-semibold uppercase tracking-[0.16em] text-white">
         {menu?.announcement_text || 'New season pieces now available. Order directly on WhatsApp.'}
       </div>
       <header className="sticky top-0 z-40 border-b border-brand-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-[1500px] items-center justify-between px-4 sm:px-6 lg:px-10">
-          <button className="p-2 lg:hidden" onClick={() => setMenuOpen(true)} aria-label="Open menu">
-            <Menu className="h-6 w-6" />
+        <div className="mx-auto flex h-14 sm:h-16 max-w-[1500px] items-center justify-center px-3 sm:px-6 lg:px-10 gap-2 relative">
+          <button className="absolute left-3 sm:left-6 lg:left-10 p-1.5 lg:hidden" onClick={() => setMenuOpen(true)} aria-label="Open menu">
+            <Menu className="h-5 w-5" />
           </button>
 
-          <nav className="hidden flex-1 items-center gap-7 lg:flex">
+          <nav className="hidden flex-1 items-center gap-6 lg:flex absolute left-10">
             {navLinks.slice(0, 5).map((link) => (
-              <Link key={`${link.name}-${link.url}`} href={sanitizeUrl(link.url)} className="text-xs font-bold uppercase tracking-[0.18em] text-brand-700 hover:text-brand-900">
+              <Link key={`${link.name}-${link.url}`} href={sanitizeUrl(link.url)} className="text-xs font-bold uppercase tracking-[0.16em] text-brand-700 hover:text-brand-900">
                 {link.name}
               </Link>
             ))}
           </nav>
 
-          <Link href="/" className="font-display text-3xl italic tracking-normal text-brand-900 sm:text-4xl">
+          <Link href="/" className="font-display text-xl sm:text-3xl italic tracking-normal text-brand-900 lg:text-4xl">
             {general?.store_name || 'Inspofashions'}
           </Link>
 
-          <div className="flex flex-1 items-center justify-end gap-3">
-            <button className="p-2" onClick={() => setSearchOpen(true)} aria-label="Search">
-              <Search className="h-5 w-5" />
+          <div className="absolute right-3 sm:right-6 lg:right-10 flex items-center justify-end gap-1 sm:gap-3">
+            <button className="p-1.5 sm:p-2" onClick={() => setSearchOpen(true)} aria-label="Search">
+              <Search className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
-            <button className="relative p-2" onClick={onCartClick} aria-label="Open cart">
-              <ShoppingBag className="h-5 w-5" />
+            <button className="relative p-1.5 sm:p-2" onClick={onCartClick} aria-label="Open cart">
+              <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5" />
               {totalItems > 0 && (
-                <span className="absolute right-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#6f1d1b] px-1 text-[10px] font-bold text-white">
+                <span className="absolute right-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#6f1d1b] px-0.5 text-[8px] sm:text-[10px] font-bold text-white">
                   {totalItems > 9 ? '9+' : totalItems}
                 </span>
               )}
@@ -108,34 +108,34 @@ function Header({ menu, general, products, collections, onCartClick }) {
           onClick={() => setMenuOpen(false)}
           aria-label="Close menu"
         />
-        <div className="relative flex h-full w-[88vw] max-w-sm flex-col bg-white p-5 shadow-2xl animate-[slideInMenu_260ms_ease-out]">
-          <div className="mb-10 flex items-center justify-between">
-            <span className="font-display text-3xl italic">{general?.store_name || 'Inspofashions'}</span>
-            <button className="rounded-full border border-brand-200 p-2 transition hover:bg-brand-50" onClick={() => setMenuOpen(false)} aria-label="Close menu">
-              <X className="h-5 w-5" />
+        <div className="relative flex h-full w-[88vw] max-w-sm flex-col bg-white p-4 shadow-2xl animate-[slideInMenu_260ms_ease-out]">
+          <div className="mb-6 flex items-center justify-between">
+            <span className="font-display text-2xl sm:text-3xl italic">{general?.store_name || 'Inspofashions'}</span>
+            <button className="rounded-full border border-brand-200 p-1.5 transition hover:bg-brand-50" onClick={() => setMenuOpen(false)} aria-label="Close menu">
+              <X className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
           </div>
-          <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.24em] text-[#6f1d1b]">Collections</p>
-          <nav className="space-y-1">
+          <p className="mb-2 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.2em] text-[#6f1d1b]">Collections</p>
+          <nav className="space-y-0">
             {navLinks.map((link) => (
               <Link
                 key={`${link.name}-${link.url}`}
                 href={sanitizeUrl(link.url)}
                 onClick={() => setMenuOpen(false)}
-                className="group flex items-center justify-between border-b border-brand-100 py-4 text-lg font-semibold"
+                className="group flex items-center justify-between border-b border-brand-100 py-3 sm:py-4 text-base sm:text-lg font-semibold"
               >
                 <span>{link.name}</span>
                 <span className="text-brand-300 transition group-hover:translate-x-1 group-hover:text-brand-900">→</span>
               </Link>
             ))}
-            <Link href="/shipping-returns" onClick={() => setMenuOpen(false)} className="block border-b border-brand-100 py-4 text-lg font-semibold">
+            <Link href="/shipping-returns" onClick={() => setMenuOpen(false)} className="block border-b border-brand-100 py-3 sm:py-4 text-base sm:text-lg font-semibold">
               Shipping & Returns
             </Link>
-            <Link href="/contact" onClick={() => setMenuOpen(false)} className="block border-b border-brand-100 py-4 text-lg font-semibold">
+            <Link href="/contact" onClick={() => setMenuOpen(false)} className="block border-b border-brand-100 py-3 sm:py-4 text-base sm:text-lg font-semibold">
               Contact
             </Link>
           </nav>
-          <div className="mt-auto border-t border-brand-100 pt-5 text-sm leading-6 text-brand-500">
+          <div className="mt-auto border-t border-brand-100 pt-4 text-xs sm:text-sm leading-5 sm:leading-6 text-brand-500">
             Browse the latest edit, choose your size, and confirm the order directly on WhatsApp.
           </div>
         </div>
@@ -143,34 +143,34 @@ function Header({ menu, general, products, collections, onCartClick }) {
       )}
 
       {searchOpen && (
-      <div className="fixed inset-0 z-50 bg-white">
-        <div className="mx-auto max-w-3xl px-4 py-6 animate-[fadeUp_220ms_ease-out]">
-          <div className="mb-8 flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-brand-500">Search the edit</span>
-            <button className="rounded-full border border-brand-200 p-2 transition hover:bg-brand-50" onClick={() => setSearchOpen(false)} aria-label="Close search">
-              <X className="h-5 w-5" />
+      <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
+        <div className="mx-auto max-w-3xl px-3 sm:px-4 py-4 sm:py-6">
+          <div className="mb-6 flex items-center justify-between">
+            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.16em] text-brand-500">Search the edit</span>
+            <button className="rounded-full border border-brand-200 p-1.5 transition hover:bg-brand-50" onClick={() => setSearchOpen(false)} aria-label="Close search">
+              <X className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
           </div>
-          <form onSubmit={submitSearch} className="flex items-center border-b border-brand-900 pb-3">
-            <Search className="mr-3 h-5 w-5 text-brand-500" />
+          <form onSubmit={submitSearch} className="flex items-center border-b border-brand-900 pb-2 mb-4">
+            <Search className="mr-2 h-4 w-4 sm:h-5 sm:w-5 text-brand-500 flex-shrink-0" />
             <input
               ref={searchInputRef}
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search shirts, co-ords, linen..."
-              className="w-full bg-transparent text-2xl outline-none placeholder:text-brand-300 sm:text-4xl"
+              placeholder="Search shirts, co-ords..."
+              className="w-full bg-transparent text-lg sm:text-2xl outline-none placeholder:text-brand-300"
             />
           </form>
-          <div className="mt-6 space-y-2">
+          <div className="space-y-1 sm:space-y-2">
             {query.trim() && suggestions.length === 0 && (
-              <div className="rounded-sm bg-brand-50 px-4 py-5 text-sm text-brand-500">
+              <div className="rounded-sm bg-brand-50 px-3 py-3 sm:px-4 sm:py-5 text-xs sm:text-sm text-brand-500">
                 No matches yet. Press Enter to search the full catalog.
               </div>
             )}
             {suggestions.map((product) => (
-              <Link key={product.id} href={`/products/${product.slug}`} onClick={() => setSearchOpen(false)} className="block rounded-sm px-2 py-3 transition hover:bg-brand-50">
-                <span className="font-semibold">{product.title}</span>
-                <span className="ml-2 text-sm text-brand-500">{product.category}</span>
+              <Link key={product.id} href={`/products/${product.slug}`} onClick={() => setSearchOpen(false)} className="block rounded-sm px-2 py-2 sm:px-3 sm:py-3 transition hover:bg-brand-50">
+                <span className="text-sm sm:text-base font-semibold">{product.title}</span>
+                <span className="ml-2 text-xs sm:text-sm text-brand-500">{product.category}</span>
               </Link>
             ))}
           </div>

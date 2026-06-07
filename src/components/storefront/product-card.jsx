@@ -58,15 +58,15 @@ export function ProductCard({ product, priority = false }) {
           </span>
         )}
       </div>
-      <div className="mt-3 flex items-start justify-between gap-3">
-        <div>
-          <h3 className={`font-semibold leading-tight group-hover:underline ${product.is_sold_out ? 'text-brand-400' : 'text-brand-900'}`}>{product.title}</h3>
-          <p className="mt-1 text-sm text-brand-500">{product.category}</p>
+      <div className="mt-2 flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <h3 className={`text-xs sm:text-sm font-semibold leading-tight group-hover:underline ${product.is_sold_out ? 'text-brand-400' : 'text-brand-900'}`}>{product.title}</h3>
+          <p className="mt-0.5 text-xs text-brand-500">{product.category}</p>
         </div>
-        <p className={`shrink-0 font-semibold ${product.is_sold_out ? 'text-brand-400' : ''}`}>{formatPrice(product.price)}</p>
+        <p className={`shrink-0 text-xs sm:text-sm font-semibold ${product.is_sold_out ? 'text-brand-400' : ''}`}>{formatPrice(product.price)}</p>
       </div>
       {product.colors?.length > 0 && (
-        <p className="mt-2 text-xs uppercase tracking-[0.14em] text-brand-500">{product.colors.length} colours</p>
+        <p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-brand-500">{product.colors.length} colours</p>
       )}
     </Link>
   )
