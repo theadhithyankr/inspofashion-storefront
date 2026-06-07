@@ -135,3 +135,110 @@ export function searchProducts(products, query) {
     return haystack.includes(term)
   })
 }
+
+/**
+ * Enhanced: Fetch product with variants and color-specific images
+ * Joins product_variants and product_images tables for rich variant data
+ */
+export async function getProductBySlugWithVariants(slug) {
+  const supabase = getSupabase()
+  const products = await getProducts()
+  const baseProduct = products.find((p) => getProductSlug(p) === slug)
+  
+  if (!baseProduct) return null
+
+  // Fetch all variants for this product (parallel)
+  const [variantsResponse, imagesResponse] = await Promise.all([
+    supabase
+      .from('product_variants')
+      .select('*')
+      .eq('product_id', baseProduct.id),
+    supabase
+      .from('product_images')
+      .select('*')
+      .eq('product_id', baseProduct.id)
+      .order('color_name', { ascending: true })
+      .order('display_order', { ascending: true }),
+  ])
+
+  const variants = variantsResponse.data || []
+  const colorImages = imagesResponse.data || []
+
+  return {
+    ...baseProduct,
+    variants,
+    colorImages,
+  }
+}
+
+/**
+ * Real-time stock check for a specific color + size combination
+ * Returns inventory quantity, SKU, and any price override
+ */
+export async function checkVariantStock(productId, colorName, sizeLabel) {
+  const supabase = getSupabase()
+
+  const { data, error } = await supabase
+    .from('product_variants')
+    .select('id, inventory_qty, sku, price, product_id, color_name, size_label')
+    .eq('product_id', productId)
+    .eq('color_name', colorName)
+    .eq('size_label', sizeLabel)
+    .single()
+
+  if (error || !data) {
+    return {
+      isInStock: false,
+      quantity: 0,
+      sku: '',
+      product_id: productId,
+      color_name: colorName,
+      size_label: sizeLabel,
+    }
+  }
+
+  return {
+    isInStock: data.inventory_qty > 0,
+    quantity: data.inventory_qty,
+    sku: data.sku,
+    price: data.price,
+    product_id: productId,
+    color_name: colorName,
+    size_label: sizeLabel,
+  }
+}
+
+/**
+ * Get all available colors for a product with their stock status
+ * Useful for greying out out-of-stock colors
+ */
+export async function getColorAvailability(productId) {
+  const supabase = getSupabase()
+
+  const { data } = await supabase
+    .from('product_variants')
+    .select('color_name, inventory_qty')
+    .eq('product_id', productId)
+    .gt('inventory_qty', 0)
+
+  const availableColors = new Set(data?.map((v) => v.color_name) || [])
+  return availableColors
+}
+
+/**
+ * Get all available sizes for a product with their stock status
+ * Useful for greying out out-of-stock sizes
+ */
+export async function getSizeAvailability(productId, colorName) {
+  const supabase = getSupabase()
+
+  const { data } = await supabase
+    .from('product_variants')
+    .select('size_label, inventory_qty')
+    .eq('product_id', productId)
+    .eq('color_name', colorName)
+    .gt('inventory_qty', 0)
+
+  const availableSizes = new Set(data?.map((v) => v.size_label) || [])
+  return availableSizes
+}

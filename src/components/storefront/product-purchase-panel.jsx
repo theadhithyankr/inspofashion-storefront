@@ -2,25 +2,41 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Minus, Plus, ShoppingBag } from 'lucide-react'
-import { formatPrice } from '@/lib/format'
+import { formatPrice, getColorHex } from '@/lib/format'
 import { useCart } from './cart-context'
 
-export function ProductPurchasePanel({ product, selectedColor, onColorChange }) {
+export function ProductPurchasePanel({ 
+  product, 
+  selectedColor, 
+  onColorChange,
+  selectedSize,
+  onSizeChange,
+  stockStatus,
+  isCheckingStock = false,
+}) {
   const availableSizes = useMemo(() => product.sizes?.filter(Boolean) || [], [product.sizes])
-  const [size, setSize] = useState(availableSizes[0] || 'One Size')
   const [quantity, setQuantity] = useState(1)
   const [error, setError] = useState('')
   const [added, setAdded] = useState(false)
   const openCartAtCountRef = useRef(null)
   const { addToCart, totalItems } = useCart()
 
-  // Use selectedColor from props, fallback to first color
+  // Use selected color and size from props
   const color = selectedColor || product.colors?.[0] || ''
+  const size = selectedSize || availableSizes[0] || 'One Size'
 
-  // Handle color change - call parent callback
+  // Handle color change from purchase panel
   const handleColorChange = (newColor) => {
     if (onColorChange) {
       onColorChange(newColor)
+    }
+  }
+
+  // Handle size change
+  const handleSizeChange = (newSize) => {
+    setError('')
+    if (onSizeChange) {
+      onSizeChange(newSize)
     }
   }
 
@@ -31,8 +47,15 @@ export function ProductPurchasePanel({ product, selectedColor, onColorChange }) 
   }, [totalItems])
 
   const add = () => {
+    // Check if product is sold out (overall)
     if (product.is_sold_out) {
       setError('This product is sold out.')
+      return false
+    }
+
+    // Check if variant is out of stock (color + size combo)
+    if (!stockStatus.isInStock) {
+      setError(`Sorry, ${color} in size ${size} is out of stock.`)
       return false
     }
 
@@ -48,6 +71,9 @@ export function ProductPurchasePanel({ product, selectedColor, onColorChange }) 
     window.setTimeout(() => setAdded(false), 1800)
     return true
   }
+
+  // Determine if add-to-cart button should be disabled
+  const isAddDisabled = product.is_sold_out || !stockStatus.isInStock || isCheckingStock || !size
 
   return (
     <div className="lg:sticky lg:top-28">
@@ -98,11 +124,14 @@ export function ProductPurchasePanel({ product, selectedColor, onColorChange }) 
           {availableSizes.map((option) => (
             <button
               key={option}
-              onClick={() => {
-                setSize(option)
-                setError('')
-              }}
-              className={`border px-3 py-3 text-sm font-semibold ${size === option ? 'border-brand-900 bg-brand-900 text-white' : 'border-brand-200 bg-white text-brand-900 hover:border-brand-900'}`}
+              onClick={() => handleSizeChange(option)}
+              disabled={isCheckingStock}
+              className={`border px-3 py-3 text-sm font-semibold transition-all ${
+                size === option 
+                  ? 'border-black bg-black text-white' 
+                  : 'border-brand-200 bg-white text-brand-900 hover:border-black'
+              } ${isCheckingStock ? 'opacity-50 cursor-not-allowed' : ''}`}
+              title={`${option}${size === option && stockStatus.quantity ? ` - ${stockStatus.quantity} in stock` : ''}`}
             >
               {option}
             </button>
@@ -114,6 +143,15 @@ export function ProductPurchasePanel({ product, selectedColor, onColorChange }) 
           </p>
         )}
       </div>
+
+      {/* Stock Status Display */}
+      {stockStatus.isInStock && !isCheckingStock && stockStatus.quantity > 0 && size && (
+        <div className="mt-4 flex items-center gap-2 text-xs text-green-600">
+          <div className="h-2 w-2 rounded-full bg-green-600" />
+          <span>{stockStatus.quantity} in stock</span>
+          {stockStatus.sku && <span className="text-gray-500">({stockStatus.sku})</span>}
+        </div>
+      )}
 
       <div className="mt-6">
         <span className="mb-3 block text-sm font-bold uppercase tracking-[0.16em]">Quantity</span>
@@ -139,21 +177,34 @@ export function ProductPurchasePanel({ product, selectedColor, onColorChange }) 
       </div>
 
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-brand-200 bg-white/95 p-3 shadow-[0_-12px_40px_rgba(28,25,23,0.08)] backdrop-blur lg:static lg:mt-8 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none">
-        {product.is_sold_out ? (
+        {product.is_sold_out || !stockStatus.isInStock ? (
           <button
             disabled
-            className="flex w-full items-center justify-center gap-2 px-6 py-4 font-bold uppercase tracking-[0.16em] text-white bg-brand-300 cursor-not-allowed"
+            className="flex w-full items-center justify-center gap-2 px-6 py-4 font-bold uppercase tracking-[0.16em] text-white bg-gray-400 cursor-not-allowed"
           >
-            Sold Out
+            {product.is_sold_out ? 'Sold Out' : 'Out of Stock'}
           </button>
         ) : (
           <button
             onClick={add}
-            className={`flex w-full items-center justify-center gap-2 px-6 py-4 font-bold uppercase tracking-[0.16em] text-white transition duration-300 ${added ? 'bg-[#102820]' : 'bg-brand-900 hover:bg-brand-800'}`}
+            disabled={isAddDisabled}
+            className={`flex w-full items-center justify-center gap-2 px-6 py-4 font-bold uppercase tracking-[0.16em] text-white transition duration-300 ${
+              isAddDisabled
+                ? 'bg-gray-400 cursor-not-allowed opacity-70'
+                : added 
+                ? 'bg-[#102820]' 
+                : 'bg-black hover:bg-gray-900'
+            }`}
             aria-live="polite"
+            title={isCheckingStock ? 'Checking stock...' : isAddDisabled ? 'Please select a size' : 'Add to bag'}
           >
             <ShoppingBag className="h-5 w-5" />
-            {added ? 'Added to bag' : `Add to bag - ${formatPrice(Number(product.price) * quantity)}`}
+            {isCheckingStock 
+              ? 'Checking stock...' 
+              : added 
+              ? 'Added to bag' 
+              : `Add to bag - ${formatPrice(Number(product.price) * quantity)}`
+            }
           </button>
         )}
         {added && <p className="mt-2 text-center text-xs font-semibold uppercase tracking-[0.16em] text-[#102820]">Opening your bag...</p>}
@@ -234,18 +285,4 @@ function InfoRow({ label, value }) {
       <p className="mt-2 leading-6 text-brand-700">{value}</p>
     </div>
   )
-}
-
-function getColorHex(colorName) {
-  const colorMap = {
-    'red': '#dc2626', 'blue': '#2563eb', 'green': '#16a34a', 'yellow': '#eab308',
-    'orange': '#ea580c', 'purple': '#9333ea', 'pink': '#ec4899', 'black': '#1f2937',
-    'white': '#f5f5f5', 'gray': '#6b7280', 'grey': '#6b7280', 'brown': '#92400e',
-    'beige': '#dcc8a3', 'navy': '#001f3f', 'cream': '#fffdd0', 'gold': '#fbbf24',
-    'silver': '#d1d5db', 'bronze': '#b45309', 'copper': '#b7410e', 'rose': '#fb7185',
-    'maroon': '#800000', 'coral': '#ff7f50', 'teal': '#14b8a6', 'mint': '#a7f3d0',
-    'sage': '#c4b5a0', 'khaki': '#f0e68c', 'olive': '#808000', 'tan': '#d2b48c',
-    'peach': '#ffbe98', 'lavender': '#e6e6fa', 'indigo': '#4b0082',
-  }
-  return colorMap[colorName?.toLowerCase()] || '#e5e7eb'
 }
