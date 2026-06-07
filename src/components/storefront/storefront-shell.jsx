@@ -68,12 +68,12 @@ function Header({ menu, general, products, collections, onCartClick }) {
         {menu?.announcement_text || 'New season pieces now available. Order directly on WhatsApp.'}
       </div>
       <header className="sticky top-0 z-40 border-b border-brand-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex h-14 sm:h-16 max-w-[1500px] items-center justify-center px-14 sm:px-6 lg:px-10 gap-2 relative">
-          <button className="absolute left-2 sm:left-6 lg:left-10 p-2 lg:hidden" onClick={() => setMenuOpen(true)} aria-label="Open menu">
+        <div className="mx-auto flex h-14 sm:h-16 max-w-[1500px] items-center px-3 sm:px-6 lg:px-10 gap-3 sm:gap-6">
+          <button className="p-2 lg:hidden flex-shrink-0" onClick={() => setMenuOpen(true)} aria-label="Open menu">
             <Menu className="h-5 w-5" />
           </button>
 
-          <nav className="hidden flex-1 items-center gap-6 lg:flex absolute left-10">
+          <nav className="hidden flex-1 items-center gap-6 lg:flex">
             {navLinks.slice(0, 5).map((link) => (
               <Link key={`${link.name}-${link.url}`} href={sanitizeUrl(link.url)} className="text-xs font-bold uppercase tracking-[0.16em] text-brand-700 hover:text-brand-900">
                 {link.name}
@@ -81,11 +81,11 @@ function Header({ menu, general, products, collections, onCartClick }) {
             ))}
           </nav>
 
-          <Link href="/" className="font-display text-xl sm:text-3xl italic tracking-normal text-brand-900 lg:text-4xl">
+          <Link href="/" className="font-display text-xl sm:text-3xl italic tracking-normal text-brand-900 flex-1 text-center lg:flex-none lg:text-4xl">
             {general?.store_name || 'Inspofashions'}
           </Link>
 
-          <div className="absolute right-2 sm:right-6 lg:right-10 flex items-center justify-end gap-1 sm:gap-3">
+          <div className="flex items-center justify-end gap-1 sm:gap-3 flex-shrink-0">
             <button className="p-2 sm:p-2" onClick={() => setSearchOpen(true)} aria-label="Search">
               <Search className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
