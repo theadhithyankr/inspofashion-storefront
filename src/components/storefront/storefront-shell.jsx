@@ -84,12 +84,12 @@ function Header({ menu, general, products, collections, onCartClick }) {
           </nav>
 
           {/* Brand Name - Center (Absolute Positioning) */}
-          <Link href="/" className="font-display text-xl sm:text-2xl lg:text-3xl italic tracking-normal text-brand-900 absolute left-1/2 transform -translate-x-1/2">
+          <Link href="/" className="absolute inset-x-0 mx-auto w-fit font-display text-xl italic tracking-normal text-brand-900 sm:text-2xl lg:left-1/2 lg:right-auto lg:mx-0 lg:-translate-x-1/2 lg:text-3xl">
             {general?.store_name || 'Inspofashions'}
           </Link>
 
           {/* Search & Cart - Right */}
-          <div className="flex items-center justify-end gap-1 sm:gap-3 flex-shrink-0 absolute right-3 sm:right-6 lg:relative lg:absolute-none">
+          <div className="absolute right-3 flex flex-shrink-0 items-center justify-end gap-1 sm:right-6 sm:gap-3 lg:right-10">
             <button className="p-2 sm:p-2" onClick={() => setSearchOpen(true)} aria-label="Search">
               <Search className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
