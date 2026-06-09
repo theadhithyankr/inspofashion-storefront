@@ -1,8 +1,9 @@
+import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { ProductGrid } from '@/components/storefront/product-grid'
+import { ProductPurchasePanel } from '@/components/storefront/product-purchase-panel'
 import { formatPrice } from '@/lib/format'
 import { getProductBySlug, getProducts } from '@/lib/storefront-data'
-import { ProductDetailWrapper } from '@/components/storefront/product-detail-wrapper'
 
 export async function generateStaticParams() {
   const products = await getProducts()
@@ -54,7 +55,14 @@ export default async function ProductPage({ params }) {
     <main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <section className="mx-auto grid max-w-[1500px] gap-10 px-4 py-8 pb-28 sm:px-6 lg:grid-cols-2 lg:px-10 lg:pb-16">
-        <ProductDetailWrapper product={product} />
+        <div className="grid gap-3 sm:grid-cols-2">
+          {product.images.map((image, index) => (
+            <div key={`${image}-${index}`} className={`relative aspect-[4/5] overflow-hidden bg-brand-100 ${index === 0 ? 'sm:col-span-2' : ''}`}>
+              <Image src={image} alt={`${product.title} ${index + 1}`} fill priority={index === 0} sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover" />
+            </div>
+          ))}
+        </div>
+        <ProductPurchasePanel product={product} />
       </section>
 
       {related.length > 0 && (

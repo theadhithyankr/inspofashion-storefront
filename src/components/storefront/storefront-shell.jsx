@@ -68,59 +68,35 @@ function Header({ menu, general, products, collections, onCartClick }) {
         {menu?.announcement_text || 'New season pieces now available. Order directly on WhatsApp.'}
       </div>
       <header className="sticky top-0 z-40 border-b border-brand-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto max-w-[1500px] px-3 sm:px-6 lg:px-10">
-          {/* Mobile/Tablet Header */}
-          <div className="flex lg:hidden h-14 sm:h-16 items-center gap-3 sm:gap-6">
-            <button className="p-2 flex-shrink-0" onClick={() => setMenuOpen(true)} aria-label="Open menu">
-              <Menu className="h-5 w-5" />
+        <div className="mx-auto flex h-14 sm:h-16 max-w-[1500px] items-center px-3 sm:px-6 lg:px-10 gap-3 sm:gap-6">
+          <button className="p-2 lg:hidden flex-shrink-0" onClick={() => setMenuOpen(true)} aria-label="Open menu">
+            <Menu className="h-5 w-5" />
+          </button>
+
+          <nav className="hidden flex-1 items-center gap-6 lg:flex">
+            {navLinks.slice(0, 5).map((link) => (
+              <Link key={`${link.name}-${link.url}`} href={sanitizeUrl(link.url)} className="text-xs font-bold uppercase tracking-[0.16em] text-brand-700 hover:text-brand-900">
+                {link.name}
+              </Link>
+            ))}
+          </nav>
+
+          <Link href="/" className="font-display text-xl sm:text-3xl italic tracking-normal text-brand-900 flex-1 text-center lg:flex-none lg:text-4xl">
+            {general?.store_name || 'Inspofashions'}
+          </Link>
+
+          <div className="flex items-center justify-end gap-1 sm:gap-3 flex-shrink-0">
+            <button className="p-2 sm:p-2" onClick={() => setSearchOpen(true)} aria-label="Search">
+              <Search className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
-
-            <Link href="/" className="font-display text-xl sm:text-3xl italic tracking-normal text-brand-900 flex-1 text-center">
-              {general?.store_name || 'Inspofashions'}
-            </Link>
-
-            <div className="flex items-center justify-end gap-1 sm:gap-3 flex-shrink-0">
-              <button className="p-2" onClick={() => setSearchOpen(true)} aria-label="Search">
-                <Search className="h-4 w-4 sm:h-5 sm:w-5" />
-              </button>
-              <button className="relative p-2" onClick={onCartClick} aria-label="Open cart">
-                <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5" />
-                {totalItems > 0 && (
-                  <span className="absolute right-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#6f1d1b] px-0.5 text-[8px] sm:text-[10px] font-bold text-white">
-                    {totalItems > 9 ? '9+' : totalItems}
-                  </span>
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Desktop Header */}
-          <div className="hidden lg:flex h-16 items-center justify-between">
-            <nav className="flex items-center gap-8">
-              {navLinks.slice(0, 5).map((link) => (
-                <Link key={`${link.name}-${link.url}`} href={sanitizeUrl(link.url)} className="text-xs font-bold uppercase tracking-[0.16em] text-brand-700 hover:text-brand-900">
-                  {link.name}
-                </Link>
-              ))}
-            </nav>
-
-            <Link href="/" className="font-display text-4xl italic tracking-normal text-brand-900 absolute left-1/2 transform -translate-x-1/2">
-              {general?.store_name || 'Inspofashions'}
-            </Link>
-
-            <div className="flex items-center justify-end gap-4">
-              <button className="p-2" onClick={() => setSearchOpen(true)} aria-label="Search">
-                <Search className="h-5 w-5" />
-              </button>
-              <button className="relative p-2" onClick={onCartClick} aria-label="Open cart">
-                <ShoppingBag className="h-5 w-5" />
-                {totalItems > 0 && (
-                  <span className="absolute right-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#6f1d1b] px-1 text-[10px] font-bold text-white">
-                    {totalItems > 9 ? '9+' : totalItems}
-                  </span>
-                )}
-              </button>
-            </div>
+            <button className="relative p-2 sm:p-2" onClick={onCartClick} aria-label="Open cart">
+              <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5" />
+              {totalItems > 0 && (
+                <span className="absolute right-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#6f1d1b] px-0.5 text-[8px] sm:text-[10px] font-bold text-white">
+                  {totalItems > 9 ? '9+' : totalItems}
+                </span>
+              )}
+            </button>
           </div>
         </div>
       </header>
