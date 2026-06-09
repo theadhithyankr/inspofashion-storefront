@@ -2,44 +2,19 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Minus, Plus, ShoppingBag } from 'lucide-react'
-import { formatPrice } from '@/lib/format'
+import { formatPrice, getColorHex } from '@/lib/format'
 import { useCart } from './cart-context'
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-export function ProductPurchasePanel({ 
-  product, 
-  selectedColor, 
-  onColorChange,
-  selectedSize,
-  onSizeChange,
-  stockStatus,
-  isCheckingStock = false,
-}) {
-  const availableSizes = useMemo(() => product.sizes?.filter(Boolean) || [], [product.sizes])
-=======
-export function ProductPurchasePanel({ product }) {
-  const availableSizes = useMemo(() => product.sizes?.filter(Boolean) || [], [product.sizes])
-  const [size, setSize] = useState(availableSizes[0] || 'One Size')
-  const [color, setColor] = useState(product.colors?.[0] || '')
->>>>>>> parent of 51b12b0 (feat(storefront): refactor product detail layout with color-aware image gallery)
-=======
 export function ProductPurchasePanel({ product, selectedColor, onColorChange }) {
   const availableSizes = useMemo(() => product.sizes?.filter(Boolean) || [], [product.sizes])
   const [size, setSize] = useState(availableSizes[0] || 'One Size')
->>>>>>> parent of 72e6706 (docs(storefront): add implementation guide and project documentation)
   const [quantity, setQuantity] = useState(1)
   const [error, setError] = useState('')
   const [added, setAdded] = useState(false)
   const openCartAtCountRef = useRef(null)
   const { addToCart, totalItems } = useCart()
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-  // Use selected color and size from props
-=======
   // Use selectedColor from props, fallback to first color
->>>>>>> parent of 72e6706 (docs(storefront): add implementation guide and project documentation)
   const color = selectedColor || product.colors?.[0] || ''
 
   // Handle color change - call parent callback
@@ -48,20 +23,6 @@ export function ProductPurchasePanel({ product, selectedColor, onColorChange }) 
       onColorChange(newColor)
     }
   }
-
-<<<<<<< HEAD
-  // Handle size change
-  const handleSizeChange = (newSize) => {
-    setError('')
-    if (onSizeChange) {
-      onSizeChange(newSize)
-    }
-  }
-
-=======
->>>>>>> parent of 51b12b0 (feat(storefront): refactor product detail layout with color-aware image gallery)
-=======
->>>>>>> parent of 72e6706 (docs(storefront): add implementation guide and project documentation)
   useEffect(() => {
     if (!openCartAtCountRef.current || totalItems < openCartAtCountRef.current) return
     window.dispatchEvent(new CustomEvent('storefront:open-cart'))
@@ -129,40 +90,6 @@ export function ProductPurchasePanel({ product, selectedColor, onColorChange }) 
           </p>
         )}
       </div>
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-      {/* Stock Status Display */}
-      {stockStatus.isInStock && !isCheckingStock && stockStatus.quantity > 0 && size && (
-        <div className="mt-4 flex items-center gap-2 text-xs text-green-600">
-          <div className="h-2 w-2 rounded-full bg-green-600" />
-          <span>{stockStatus.quantity} in stock</span>
-          {stockStatus.sku && <span className="text-gray-500">({stockStatus.sku})</span>}
-=======
-      {product.colors?.length > 0 && (
-        <div className="mt-6">
-          <div className="mb-3 flex items-center justify-between">
-            <span className="text-sm font-bold uppercase tracking-[0.16em]">Colour</span>
-            {color && <span className="text-sm font-semibold text-brand-600">{color}</span>}
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {product.colors.map((option) => (
-              <button
-                key={option}
-                onClick={() => setColor(option)}
-                disabled={product.is_sold_out}
-                className={`border px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50 ${color === option ? 'border-brand-900 bg-brand-900 text-white' : 'border-brand-200 bg-white text-brand-900 hover:border-brand-900'}`}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
->>>>>>> parent of 51b12b0 (feat(storefront): refactor product detail layout with color-aware image gallery)
-        </div>
-      )}
-
-=======
->>>>>>> parent of 72e6706 (docs(storefront): add implementation guide and project documentation)
       <div className="mt-6">
         <span className="mb-3 block text-sm font-bold uppercase tracking-[0.16em]">Quantity</span>
         <div className="flex w-fit items-center border border-brand-200">
@@ -223,18 +150,4 @@ function InfoRow({ label, value }) {
       <p className="mt-2 leading-6 text-brand-700">{value}</p>
     </div>
   )
-}
-
-function getColorHex(colorName) {
-  const colorMap = {
-    'red': '#dc2626', 'blue': '#2563eb', 'green': '#16a34a', 'yellow': '#eab308',
-    'orange': '#ea580c', 'purple': '#9333ea', 'pink': '#ec4899', 'black': '#1f2937',
-    'white': '#f5f5f5', 'gray': '#6b7280', 'grey': '#6b7280', 'brown': '#92400e',
-    'beige': '#dcc8a3', 'navy': '#001f3f', 'cream': '#fffdd0', 'gold': '#fbbf24',
-    'silver': '#d1d5db', 'bronze': '#b45309', 'copper': '#b7410e', 'rose': '#fb7185',
-    'maroon': '#800000', 'coral': '#ff7f50', 'teal': '#14b8a6', 'mint': '#a7f3d0',
-    'sage': '#c4b5a0', 'khaki': '#f0e68c', 'olive': '#808000', 'tan': '#d2b48c',
-    'peach': '#ffbe98', 'lavender': '#e6e6fa', 'indigo': '#4b0082',
-  }
-  return colorMap[colorName?.toLowerCase()] || '#e5e7eb'
 }
