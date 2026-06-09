@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Minus, Plus, ShoppingBag } from 'lucide-react'
-import { formatPrice, getColorHex } from '@/lib/format'
+import { formatPrice } from '@/lib/format'
 import { useCart } from './cart-context'
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 export function ProductPurchasePanel({ 
   product, 
@@ -22,6 +23,11 @@ export function ProductPurchasePanel({ product }) {
   const [size, setSize] = useState(availableSizes[0] || 'One Size')
   const [color, setColor] = useState(product.colors?.[0] || '')
 >>>>>>> parent of 51b12b0 (feat(storefront): refactor product detail layout with color-aware image gallery)
+=======
+export function ProductPurchasePanel({ product, selectedColor, onColorChange }) {
+  const availableSizes = useMemo(() => product.sizes?.filter(Boolean) || [], [product.sizes])
+  const [size, setSize] = useState(availableSizes[0] || 'One Size')
+>>>>>>> parent of 72e6706 (docs(storefront): add implementation guide and project documentation)
   const [quantity, setQuantity] = useState(1)
   const [error, setError] = useState('')
   const [added, setAdded] = useState(false)
@@ -29,17 +35,21 @@ export function ProductPurchasePanel({ product }) {
   const { addToCart, totalItems } = useCart()
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   // Use selected color and size from props
+=======
+  // Use selectedColor from props, fallback to first color
+>>>>>>> parent of 72e6706 (docs(storefront): add implementation guide and project documentation)
   const color = selectedColor || product.colors?.[0] || ''
-  const size = selectedSize || availableSizes[0] || 'One Size'
 
-  // Handle color change from purchase panel
+  // Handle color change - call parent callback
   const handleColorChange = (newColor) => {
     if (onColorChange) {
       onColorChange(newColor)
     }
   }
 
+<<<<<<< HEAD
   // Handle size change
   const handleSizeChange = (newSize) => {
     setError('')
@@ -50,6 +60,8 @@ export function ProductPurchasePanel({ product }) {
 
 =======
 >>>>>>> parent of 51b12b0 (feat(storefront): refactor product detail layout with color-aware image gallery)
+=======
+>>>>>>> parent of 72e6706 (docs(storefront): add implementation guide and project documentation)
   useEffect(() => {
     if (!openCartAtCountRef.current || totalItems < openCartAtCountRef.current) return
     window.dispatchEvent(new CustomEvent('storefront:open-cart'))
@@ -57,15 +69,8 @@ export function ProductPurchasePanel({ product }) {
   }, [totalItems])
 
   const add = () => {
-    // Check if product is sold out (overall)
     if (product.is_sold_out) {
       setError('This product is sold out.')
-      return false
-    }
-
-    // Check if variant is out of stock (color + size combo)
-    if (!stockStatus.isInStock) {
-      setError(`Sorry, ${color} in size ${size} is out of stock.`)
       return false
     }
 
@@ -81,9 +86,6 @@ export function ProductPurchasePanel({ product }) {
     window.setTimeout(() => setAdded(false), 1800)
     return true
   }
-
-  // Determine if add-to-cart button should be disabled
-  const isAddDisabled = product.is_sold_out || !stockStatus.isInStock || isCheckingStock || !size
 
   return (
     <div className="lg:sticky lg:top-28">
@@ -111,14 +113,11 @@ export function ProductPurchasePanel({ product }) {
           {availableSizes.map((option) => (
             <button
               key={option}
-              onClick={() => handleSizeChange(option)}
-              disabled={isCheckingStock}
-              className={`border px-3 py-3 text-sm font-semibold transition-all ${
-                size === option 
-                  ? 'border-black bg-black text-white' 
-                  : 'border-brand-200 bg-white text-brand-900 hover:border-black'
-              } ${isCheckingStock ? 'opacity-50 cursor-not-allowed' : ''}`}
-              title={`${option}${size === option && stockStatus.quantity ? ` - ${stockStatus.quantity} in stock` : ''}`}
+              onClick={() => {
+                setSize(option)
+                setError('')
+              }}
+              className={`border px-3 py-3 text-sm font-semibold ${size === option ? 'border-brand-900 bg-brand-900 text-white' : 'border-brand-200 bg-white text-brand-900 hover:border-brand-900'}`}
             >
               {option}
             </button>
@@ -131,6 +130,7 @@ export function ProductPurchasePanel({ product }) {
         )}
       </div>
 
+<<<<<<< HEAD
 <<<<<<< HEAD
       {/* Stock Status Display */}
       {stockStatus.isInStock && !isCheckingStock && stockStatus.quantity > 0 && size && (
@@ -161,6 +161,8 @@ export function ProductPurchasePanel({ product }) {
         </div>
       )}
 
+=======
+>>>>>>> parent of 72e6706 (docs(storefront): add implementation guide and project documentation)
       <div className="mt-6">
         <span className="mb-3 block text-sm font-bold uppercase tracking-[0.16em]">Quantity</span>
         <div className="flex w-fit items-center border border-brand-200">
@@ -185,34 +187,21 @@ export function ProductPurchasePanel({ product }) {
       </div>
 
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-brand-200 bg-white/95 p-3 shadow-[0_-12px_40px_rgba(28,25,23,0.08)] backdrop-blur lg:static lg:mt-8 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none">
-        {product.is_sold_out || !stockStatus.isInStock ? (
+        {product.is_sold_out ? (
           <button
             disabled
-            className="flex w-full items-center justify-center gap-2 px-6 py-4 font-bold uppercase tracking-[0.16em] text-white bg-gray-400 cursor-not-allowed"
+            className="flex w-full items-center justify-center gap-2 px-6 py-4 font-bold uppercase tracking-[0.16em] text-white bg-brand-300 cursor-not-allowed"
           >
-            {product.is_sold_out ? 'Sold Out' : 'Out of Stock'}
+            Sold Out
           </button>
         ) : (
           <button
             onClick={add}
-            disabled={isAddDisabled}
-            className={`flex w-full items-center justify-center gap-2 px-6 py-4 font-bold uppercase tracking-[0.16em] text-white transition duration-300 ${
-              isAddDisabled
-                ? 'bg-gray-400 cursor-not-allowed opacity-70'
-                : added 
-                ? 'bg-[#102820]' 
-                : 'bg-black hover:bg-gray-900'
-            }`}
+            className={`flex w-full items-center justify-center gap-2 px-6 py-4 font-bold uppercase tracking-[0.16em] text-white transition duration-300 ${added ? 'bg-[#102820]' : 'bg-brand-900 hover:bg-brand-800'}`}
             aria-live="polite"
-            title={isCheckingStock ? 'Checking stock...' : isAddDisabled ? 'Please select a size' : 'Add to bag'}
           >
             <ShoppingBag className="h-5 w-5" />
-            {isCheckingStock 
-              ? 'Checking stock...' 
-              : added 
-              ? 'Added to bag' 
-              : `Add to bag - ${formatPrice(Number(product.price) * quantity)}`
-            }
+            {added ? 'Added to bag' : `Add to bag - ${formatPrice(Number(product.price) * quantity)}`}
           </button>
         )}
         {added && <p className="mt-2 text-center text-xs font-semibold uppercase tracking-[0.16em] text-[#102820]">Opening your bag...</p>}
@@ -234,4 +223,18 @@ function InfoRow({ label, value }) {
       <p className="mt-2 leading-6 text-brand-700">{value}</p>
     </div>
   )
+}
+
+function getColorHex(colorName) {
+  const colorMap = {
+    'red': '#dc2626', 'blue': '#2563eb', 'green': '#16a34a', 'yellow': '#eab308',
+    'orange': '#ea580c', 'purple': '#9333ea', 'pink': '#ec4899', 'black': '#1f2937',
+    'white': '#f5f5f5', 'gray': '#6b7280', 'grey': '#6b7280', 'brown': '#92400e',
+    'beige': '#dcc8a3', 'navy': '#001f3f', 'cream': '#fffdd0', 'gold': '#fbbf24',
+    'silver': '#d1d5db', 'bronze': '#b45309', 'copper': '#b7410e', 'rose': '#fb7185',
+    'maroon': '#800000', 'coral': '#ff7f50', 'teal': '#14b8a6', 'mint': '#a7f3d0',
+    'sage': '#c4b5a0', 'khaki': '#f0e68c', 'olive': '#808000', 'tan': '#d2b48c',
+    'peach': '#ffbe98', 'lavender': '#e6e6fa', 'indigo': '#4b0082',
+  }
+  return colorMap[colorName?.toLowerCase()] || '#e5e7eb'
 }
