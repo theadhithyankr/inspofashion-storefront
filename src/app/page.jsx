@@ -5,6 +5,8 @@ import { ProductGrid } from '@/components/storefront/product-grid'
 import { clampText } from '@/lib/format'
 import { getStorefrontData } from '@/lib/storefront-data'
 
+export const revalidate = 60 // Revalidate every 60 seconds
+
 export default async function HomePage() {
   const { products, collections, hero } = await getStorefrontData()
   const featured = products.filter((product) => product.is_featured).slice(0, 8)

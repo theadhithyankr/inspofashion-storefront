@@ -2,6 +2,8 @@ import { notFound } from 'next/navigation'
 import { CollectionBrowser } from '@/components/storefront/collection-browser'
 import { getCollectionBySlug, getCollections, getProductsForCollection } from '@/lib/storefront-data'
 
+export const revalidate = 60 // Revalidate every 60 seconds
+
 export async function generateStaticParams() {
   const collections = await getCollections()
   return collections.map((collection) => ({ slug: collection.slug }))

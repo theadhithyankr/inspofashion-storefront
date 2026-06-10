@@ -5,6 +5,8 @@ import { ProductPurchasePanel } from '@/components/storefront/product-purchase-p
 import { formatPrice } from '@/lib/format'
 import { getProductBySlug, getProducts } from '@/lib/storefront-data'
 
+export const revalidate = 60 // Revalidate every 60 seconds
+
 export async function generateStaticParams() {
   const products = await getProducts()
   return products.map((product) => ({ slug: product.slug }))
