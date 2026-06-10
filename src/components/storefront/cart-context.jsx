@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useState } from 'react'
+import { getVariantImageForColor } from '@/lib/format'
 
 const CartContext = createContext(null)
 
@@ -54,7 +55,7 @@ export function CartProvider({ children }) {
           slug: product.slug,
           title: product.title,
           price: Number(product.price),
-          imageUrl: product.images?.[0] || product.image_url,
+          imageUrl: options.imageUrl || getVariantImageForColor(product, color) || product.images?.[0] || product.image_url,
           size,
           color,
           quantity,

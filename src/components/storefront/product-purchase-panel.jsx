@@ -2,10 +2,10 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Minus, Plus, ShoppingBag } from 'lucide-react'
-import { formatPrice, getColorHex } from '@/lib/format'
+import { formatPrice } from '@/lib/format'
 import { useCart } from './cart-context'
 
-export function ProductPurchasePanel({ product, selectedColor, onColorChange }) {
+export function ProductPurchasePanel({ product, selectedColor }) {
   const availableSizes = useMemo(() => product.sizes?.filter(Boolean) || [], [product.sizes])
   const [size, setSize] = useState(availableSizes[0] || 'One Size')
   const [quantity, setQuantity] = useState(1)
@@ -17,12 +17,6 @@ export function ProductPurchasePanel({ product, selectedColor, onColorChange }) 
   // Use selectedColor from props, fallback to first color
   const color = selectedColor || product.colors?.[0] || ''
 
-  // Handle color change - call parent callback
-  const handleColorChange = (newColor) => {
-    if (onColorChange) {
-      onColorChange(newColor)
-    }
-  }
   useEffect(() => {
     if (!openCartAtCountRef.current || totalItems < openCartAtCountRef.current) return
     window.dispatchEvent(new CustomEvent('storefront:open-cart'))
@@ -66,6 +60,12 @@ export function ProductPurchasePanel({ product, selectedColor, onColorChange }) 
       {product.description && <p className="mt-6 leading-7 text-brand-600">{product.description}</p>}
 
       <div className="mt-8">
+        {color && (
+          <div className="mb-5 rounded-2xl border border-brand-100 bg-brand-50 px-4 py-3">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-brand-500">Selected colour</p>
+            <p className="mt-1 text-sm font-semibold text-brand-900">{color}</p>
+          </div>
+        )}
         <div className="mb-3 flex items-center justify-between">
           <span className="text-sm font-bold uppercase tracking-[0.16em]">Size</span>
           <a href="/size-guide" className="text-sm text-brand-500 underline">Size guide</a>

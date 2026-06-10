@@ -48,6 +48,161 @@ export function getProductImages(product) {
   return product?.image_url ? [product.image_url] : []
 }
 
+export const COLOR_KEYWORDS = [
+  'red', 'blue', 'green', 'yellow', 'orange', 'purple', 'pink', 'black', 'white', 'gray', 'grey',
+  'brown', 'beige', 'navy', 'cream', 'gold', 'silver', 'bronze', 'copper', 'rose', 'maroon',
+  'coral', 'teal', 'mint', 'sage', 'khaki', 'olive', 'tan', 'peach', 'lavender', 'indigo',
+]
+
+const VARIANT_IMAGE_MAP_KEYS = [
+  'variant_images',
+  'variant_image_map',
+  'color_images',
+  'color_image_map',
+  'option_images',
+  'option_image_map',
+]
+
+function normalizeColorName(value = '') {
+  return value?.toString().trim().toLowerCase().replace(/[_-]+/g, ' ') || ''
+}
+
+function compactColorName(value = '') {
+  return normalizeColorName(value).replace(/\s+/g, ' ').trim()
+}
+
+function escapeRegExp(value = '') {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+function imageContainsColor(image = '', color = '') {
+  const normalizedImage = image?.toString().toLowerCase().replace(/[_-]+/g, ' ') || ''
+  const normalizedColor = compactColorName(color)
+  if (!normalizedColor) return false
+
+  const pattern = new RegExp(`(^|\\s)${escapeRegExp(normalizedColor)}(\\s|$)`)
+  return pattern.test(normalizedImage)
+}
+
+function readImageList(value) {
+  if (!value) return []
+  if (Array.isArray(value)) return value.filter(Boolean).map(String)
+  if (typeof value === 'string') return value.trim() ? [value.trim()] : []
+  if (typeof value === 'object') {
+    if (Array.isArray(value.images)) return value.images.filter(Boolean).map(String)
+    if (Array.isArray(value.imageUrls)) return value.imageUrls.filter(Boolean).map(String)
+
+    const directImage = value.image_url ?? value.imageUrl ?? value.image ?? value.url
+    if (directImage) return [String(directImage).trim()].filter(Boolean)
+  }
+  return []
+}
+
+function getVariantImages(variant = {}) {
+  return readImageList(variant.images ?? variant.image_urls ?? variant.imageUrls ?? [variant.image_url ?? variant.imageUrl ?? variant.image])
+}
+
+function getVariantColorName(variant = {}) {
+  return variant.color ?? variant.name ?? variant.option1 ?? variant.option_value ?? variant.option1_value ?? variant.option2 ?? variant.option2_value ?? variant.value
+}
+
+function getVariantImageMap(product = {}) {
+  const map = {}
+
+  VARIANT_IMAGE_MAP_KEYS.forEach((key) => {
+    const source = product[key]
+
+    if (Array.isArray(source)) {
+      source.forEach((variant) => {
+        const color = getVariantColorName(variant)
+        if (!color) return
+
+        const images = getVariantImages(variant)
+        if (images.length > 0) map[compactColorName(color)] = images
+      })
+      return
+    }
+
+    if (source && typeof source === 'object') {
+      Object.entries(source).forEach(([color, images]) => {
+        const normalizedColor = compactColorName(color)
+        if (!normalizedColor) return
+
+        map[normalizedColor] = readImageList(images)
+      })
+    }
+  })
+
+  return map
+}
+
+function getMappedVariantImages(product, color) {
+  const map = getVariantImageMap(product)
+  const normalizedColor = compactColorName(color)
+  return map[normalizedColor] || []
+}
+
+function getVariantImagesForColor(product, color) {
+  if (!Array.isArray(product?.variants)) return []
+
+  const normalizedColor = compactColorName(color)
+  const images = product.variants
+    .filter((variant) => compactColorName(getVariantColorName(variant)) === normalizedColor)
+    .flatMap(getVariantImages)
+
+  return images.filter(Boolean)
+}
+
+function getImageInferredForColor(product, color) {
+  const images = getProductImages(product)
+  return images.filter((image) => imageContainsColor(image, color))
+}
+
+export function getProductVariantImages(product, color) {
+  const mappedImages = getMappedVariantImages(product, color)
+  if (mappedImages.length > 0) return mappedImages
+
+  const variantImages = getVariantImagesForColor(product, color)
+  if (variantImages.length > 0) return variantImages
+
+  return getImageInferredForColor(product, color)
+}
+
+export function getVariantImageForColor(product, color) {
+  return getProductVariantImages(product, color)[0] || null
+}
+
+export function getProductVariantColors(product = {}) {
+  const colors = new Set()
+
+  if (Array.isArray(product.colors)) {
+    product.colors.forEach((color) => {
+      const normalizedColor = compactColorName(color)
+      if (normalizedColor) colors.add(normalizedColor)
+    })
+  }
+
+  if (Array.isArray(product.variants)) {
+    product.variants.forEach((variant) => {
+      const normalizedColor = compactColorName(getVariantColorName(variant))
+      if (normalizedColor) colors.add(normalizedColor)
+    })
+  }
+
+  const imageMap = getVariantImageMap(product)
+  Object.keys(imageMap).forEach((color) => {
+    if (color) colors.add(color)
+  })
+
+  getProductImages(product).forEach((image) => {
+    COLOR_KEYWORDS.forEach((color) => {
+      if (imageContainsColor(image, color)) colors.add(color)
+    })
+  })
+
+  return Array.from(colors).filter(Boolean)
+}
+
 export function clampText(value = '', fallback = '') {
   return value?.toString().trim() || fallback
 }
@@ -69,22 +224,13 @@ export function getColorHex(colorName) {
 export function extractColorsFromImages(images = []) {
   if (!Array.isArray(images) || images.length === 0) return []
 
-  // Common color patterns in image filenames
-  const colorPatterns = [
-    'red', 'blue', 'green', 'yellow', 'orange', 'purple', 'pink', 'black', 'white', 'gray', 'grey',
-    'brown', 'beige', 'navy', 'cream', 'gold', 'silver', 'bronze', 'copper', 'rose', 'maroon',
-    'coral', 'teal', 'mint', 'sage', 'khaki', 'olive', 'tan', 'peach', 'lavender', 'indigo',
-  ]
-
   const detectedColors = new Set()
 
   images.forEach((image) => {
     if (!image) return
-    const filename = image.toLowerCase()
 
-    colorPatterns.forEach((color) => {
-      // Match color word boundaries (e.g., "red-shirt" or "red_shirt" or "red.jpg")
-      if (filename.match(new RegExp(`\\b${color}\\b|[-_]${color}[-_.]|^${color}[-_.]`))) {
+    COLOR_KEYWORDS.forEach((color) => {
+      if (imageContainsColor(image, color)) {
         detectedColors.add(color.charAt(0).toUpperCase() + color.slice(1))
       }
     })

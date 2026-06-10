@@ -1,6 +1,6 @@
 import { cache } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { getCollectionSlug, getProductImages, getProductSlug, slugify, extractColorsFromImages, extractColorsFromTags } from './format'
+import { getCollectionSlug, getProductImages, getProductSlug, getProductVariantColors, slugify, extractColorsFromImages, extractColorsFromTags } from './format'
 
 const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY
@@ -21,14 +21,17 @@ function getSupabase() {
 function normalizeProduct(product) {
   const images = getProductImages(product)
   
-  // Try to auto-detect colors from various sources
+  // Try to auto-detect colors from explicit variants, image filename mappings, image names, or tags.
   let colors = Array.isArray(product.colors) ? product.colors : []
-  
-  // If no colors in database, try to detect from images or tags
+
+  if (colors.length === 0) {
+    colors = getProductVariantColors(product)
+  }
+
   if (colors.length === 0) {
     colors = extractColorsFromImages(images)
   }
-  
+
   if (colors.length === 0 && Array.isArray(product.tags)) {
     colors = extractColorsFromTags(product.tags)
   }
@@ -39,7 +42,7 @@ function normalizeProduct(product) {
     price: Number.parseFloat(product.price || 0),
     images,
     sizes: Array.isArray(product.sizes) ? product.sizes : [],
-    colors: colors.filter(Boolean),
+    colors: colors.map((color) => color?.toString().trim()).filter(Boolean),
     tags: Array.isArray(product.tags) ? product.tags : [],
     quantity: Number(product.quantity || 0),
     is_sold_out: Number(product.quantity || 0) === 0,
