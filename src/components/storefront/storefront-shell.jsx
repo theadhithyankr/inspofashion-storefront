@@ -14,6 +14,7 @@ function Header({ menu, general, products, collections, onCartClick }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [query, setQuery] = useState('')
+  const [scrolled, setScrolled] = useState(false)
   const searchInputRef = useRef(null)
 
   const navLinks = menu?.links?.length
@@ -43,6 +44,14 @@ function Header({ menu, general, products, collections, onCartClick }) {
   }, [searchOpen])
 
   useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 0)
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  useEffect(() => {
     const closePanels = (event) => {
       if (event.key !== 'Escape') return
       setMenuOpen(false)
@@ -64,43 +73,58 @@ function Header({ menu, general, products, collections, onCartClick }) {
 
   return (
     <>
-      <div className="bg-brand-900 px-3 py-1.5 text-center text-[9px] sm:text-[11px] font-semibold uppercase tracking-[0.16em] text-white">
-        {menu?.announcement_text || 'New season pieces now available. Order directly on WhatsApp.'}
-      </div>
-      <header className="sticky top-0 z-40 border-b border-brand-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto grid h-14 max-w-[1500px] grid-cols-[1fr_auto_1fr] items-center px-3 sm:h-16 sm:px-6 lg:px-10">
-          {/* Mobile Menu Button - Left */}
-          <button className="justify-self-start p-2 lg:hidden" onClick={() => setMenuOpen(true)} aria-label="Open menu">
-            <Menu className="h-5 w-5" />
-          </button>
+      {/* Sticky Header - Transparent overlay */}
+      <header className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
+        scrolled ? 'bg-white/95 backdrop-blur-sm border-b border-black/10' : 'bg-transparent'
+      }`}>
+        <div className="mx-auto max-w-full px-6 sm:px-8 lg:px-16">
+          <div className="flex h-16 sm:h-20 items-center justify-between">
+            {/* Logo - Left */}
+            <Link href="/" className="font-display text-2xl sm:text-3xl lg:text-4xl italic tracking-normal text-black flex-shrink-0">
+              {general?.store_name || 'Inspofashions'}
+            </Link>
 
-          {/* Desktop Navigation - Left */}
-          <nav className="hidden items-center gap-6 justify-self-start lg:flex">
-            {navLinks.slice(0, 5).map((link) => (
-              <Link key={`${link.name}-${link.url}`} href={sanitizeUrl(link.url)} className="text-xs font-bold uppercase tracking-[0.16em] text-brand-700 hover:text-brand-900">
-                {link.name}
-              </Link>
-            ))}
-          </nav>
+            {/* Desktop Navigation - Center */}
+            <nav className="hidden lg:flex items-center gap-16 flex-1 justify-center">
+              {navLinks.slice(0, 3).map((link) => (
+                <Link 
+                  key={`${link.name}-${link.url}`} 
+                  href={sanitizeUrl(link.url)} 
+                  className="text-xs font-bold uppercase tracking-[0.2em] text-black/80 hover:text-black transition-colors duration-300"
+                >
+                  {link.name}
+                </Link>
+              ))}
+            </nav>
 
-          {/* Brand Name - Center */}
-          <Link href="/" className="font-display text-xl italic tracking-normal text-brand-900 sm:text-2xl lg:text-3xl">
-            {general?.store_name || 'Inspofashions'}
-          </Link>
+            {/* Search & Cart - Right */}
+            <div className="flex items-center justify-end gap-8 flex-shrink-0">
+              {/* Mobile Menu Button */}
+              <button className="lg:hidden p-2 hover:bg-white/20 rounded transition-colors" onClick={() => setMenuOpen(true)} aria-label="Open menu">
+                <Menu className="h-5 w-5 text-black" />
+              </button>
 
-          {/* Search & Cart - Right */}
-          <div className="flex items-center justify-self-end gap-1 sm:gap-3">
-            <button className="p-2" onClick={() => setSearchOpen(true)} aria-label="Search">
-              <Search className="h-4 w-4 sm:h-5 sm:w-5" />
-            </button>
-            <button className="relative p-2" onClick={onCartClick} aria-label="Open cart">
-              <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5" />
-              {totalItems > 0 && (
-                <span className="absolute right-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#6f1d1b] px-0.5 text-[8px] sm:text-[10px] font-bold text-white">
-                  {totalItems > 9 ? '9+' : totalItems}
-                </span>
-              )}
-            </button>
+              {/* Desktop Icons */}
+              <button 
+                className="hidden sm:block p-2 hover:bg-white/20 rounded transition-colors" 
+                onClick={() => setSearchOpen(true)} 
+                aria-label="Search"
+              >
+                <Search className="h-5 w-5 text-black" />
+              </button>
+              <button 
+                className="relative p-2 hover:bg-white/20 rounded transition-colors" 
+                onClick={onCartClick} 
+                aria-label="Open cart"
+              >
+                <ShoppingBag className="h-5 w-5 text-black" />
+                {totalItems > 0 && (
+                  <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-black text-white text-[9px] font-bold">
+                    {totalItems > 99 ? '99+' : totalItems}
+                  </span>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -108,39 +132,60 @@ function Header({ menu, general, products, collections, onCartClick }) {
       {menuOpen && (
       <div className="fixed inset-0 z-50 lg:hidden">
         <button
-          className="absolute inset-0 bg-black/45"
+          className="absolute inset-0 bg-black/30"
           onClick={() => setMenuOpen(false)}
           aria-label="Close menu"
         />
-        <div className="relative flex h-full w-[88vw] max-w-sm flex-col bg-white p-4 shadow-2xl animate-[slideInMenu_260ms_ease-out]">
-          <div className="mb-6 flex items-center justify-between">
-            <span className="font-display text-2xl sm:text-3xl italic">{general?.store_name || 'Inspofashions'}</span>
-            <button className="rounded-full border border-brand-200 p-1.5 transition hover:bg-brand-50" onClick={() => setMenuOpen(false)} aria-label="Close menu">
-              <X className="h-4 w-4 sm:h-5 sm:w-5" />
+        <div className="relative flex h-full w-[85vw] max-w-sm flex-col bg-white p-6 sm:p-8 shadow-2xl animate-[slideInMenu_260ms_ease-out]">
+          {/* Header with close button */}
+          <div className="mb-8 flex items-center justify-between border-b border-[#EAE0E0] pb-6">
+            <span className="font-display text-2xl sm:text-3xl italic text-black">{general?.store_name || 'Inspofashions'}</span>
+            <button 
+              className="rounded-full border border-black/20 p-2 transition hover:bg-[#FAF5F5]" 
+              onClick={() => setMenuOpen(false)} 
+              aria-label="Close menu"
+            >
+              <X className="h-5 w-5 text-black" />
             </button>
           </div>
-          <p className="mb-2 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.2em] text-[#6f1d1b]">Collections</p>
-          <nav className="space-y-0">
+
+          {/* Navigation links */}
+          <nav className="flex-1 space-y-0">
+            <p className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-black/60">Collections</p>
             {navLinks.map((link) => (
               <Link
                 key={`${link.name}-${link.url}`}
                 href={sanitizeUrl(link.url)}
                 onClick={() => setMenuOpen(false)}
-                className="group flex items-center justify-between border-b border-brand-100 py-3 sm:py-4 text-base sm:text-lg font-semibold"
+                className="group flex items-center justify-between border-b border-[#F0EDED] py-4 text-base font-semibold text-black hover:text-black/70 transition-colors"
               >
                 <span>{link.name}</span>
-                <span className="text-brand-300 transition group-hover:translate-x-1 group-hover:text-brand-900">→</span>
+                <span className="text-black/30 transition group-hover:translate-x-1 group-hover:text-black">→</span>
               </Link>
             ))}
-            <Link href="/shipping-returns" onClick={() => setMenuOpen(false)} className="block border-b border-brand-100 py-3 sm:py-4 text-base sm:text-lg font-semibold">
-              Shipping & Returns
-            </Link>
-            <Link href="/contact" onClick={() => setMenuOpen(false)} className="block border-b border-brand-100 py-3 sm:py-4 text-base sm:text-lg font-semibold">
-              Contact
-            </Link>
+
+            {/* Additional links */}
+            <div className="space-y-0 border-t border-[#EAE0E0] mt-6 pt-6">
+              <Link 
+                href="/shipping-returns" 
+                onClick={() => setMenuOpen(false)} 
+                className="block border-b border-[#F0EDED] py-4 text-base font-semibold text-black hover:text-black/70"
+              >
+                Shipping & Returns
+              </Link>
+              <Link 
+                href="/contact" 
+                onClick={() => setMenuOpen(false)} 
+                className="block py-4 text-base font-semibold text-black hover:text-black/70"
+              >
+                Contact
+              </Link>
+            </div>
           </nav>
-          <div className="mt-auto border-t border-brand-100 pt-4 text-xs sm:text-sm leading-5 sm:leading-6 text-brand-500">
-            Browse the latest edit, choose your size, and confirm the order directly on WhatsApp.
+
+          {/* Footer text */}
+          <div className="border-t border-[#EAE0E0] pt-6 text-xs leading-6 text-black/60">
+            Premium clothing curated for easy everyday ordering. Choose your fit, send the order on WhatsApp.
           </div>
         </div>
       </div>
@@ -148,33 +193,49 @@ function Header({ menu, general, products, collections, onCartClick }) {
 
       {searchOpen && (
       <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
-        <div className="mx-auto max-w-3xl px-3 sm:px-4 py-4 sm:py-6">
-          <div className="mb-6 flex items-center justify-between">
-            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.16em] text-brand-500">Search the edit</span>
-            <button className="rounded-full border border-brand-200 p-1.5 transition hover:bg-brand-50" onClick={() => setSearchOpen(false)} aria-label="Close search">
-              <X className="h-4 w-4 sm:h-5 sm:w-5" />
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 py-6 sm:py-8">
+          {/* Search header */}
+          <div className="mb-8 flex items-center justify-between border-b border-[#EAE0E0] pb-6">
+            <span className="text-xs font-bold uppercase tracking-[0.18em] text-black/60">Search</span>
+            <button 
+              className="rounded-full border border-black/20 p-2 hover:bg-[#FAF5F5] transition" 
+              onClick={() => setSearchOpen(false)} 
+              aria-label="Close search"
+            >
+              <X className="h-5 w-5 text-black" />
             </button>
           </div>
-          <form onSubmit={submitSearch} className="flex items-center border-b border-brand-900 pb-2 mb-4">
-            <Search className="mr-2 h-4 w-4 sm:h-5 sm:w-5 text-brand-500 flex-shrink-0" />
-            <input
-              ref={searchInputRef}
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search shirts, co-ords..."
-              className="w-full bg-transparent text-lg sm:text-2xl outline-none placeholder:text-brand-300"
-            />
+
+          {/* Search input */}
+          <form onSubmit={submitSearch} className="mb-6 border-b border-black pb-3">
+            <div className="flex items-center gap-3">
+              <Search className="h-5 w-5 text-black/40 flex-shrink-0" />
+              <input
+                ref={searchInputRef}
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search products, categories..."
+                className="w-full bg-transparent text-lg sm:text-2xl font-display outline-none placeholder:text-black/30"
+              />
+            </div>
           </form>
-          <div className="space-y-1 sm:space-y-2">
+
+          {/* Results */}
+          <div className="space-y-2">
             {query.trim() && suggestions.length === 0 && (
-              <div className="rounded-sm bg-brand-50 px-3 py-3 sm:px-4 sm:py-5 text-xs sm:text-sm text-brand-500">
-                No matches yet. Press Enter to search the full catalog.
+              <div className="rounded-sm bg-[#FAF5F5] px-4 py-5 text-sm text-black/60">
+                No results found. Press Enter to search the full catalog.
               </div>
             )}
             {suggestions.map((product) => (
-              <Link key={product.id} href={`/products/${product.slug}`} onClick={() => setSearchOpen(false)} className="block rounded-sm px-2 py-2 sm:px-3 sm:py-3 transition hover:bg-brand-50">
-                <span className="text-sm sm:text-base font-semibold">{product.title}</span>
-                <span className="ml-2 text-xs sm:text-sm text-brand-500">{product.category}</span>
+              <Link 
+                key={product.id} 
+                href={`/products/${product.slug}`} 
+                onClick={() => setSearchOpen(false)} 
+                className="block rounded-sm px-3 py-4 transition hover:bg-[#FAF5F5]"
+              >
+                <span className="text-base font-semibold text-black">{product.title}</span>
+                <span className="ml-2 text-xs text-black/60">{product.category}</span>
               </Link>
             ))}
           </div>
@@ -194,32 +255,48 @@ function Footer({ footer, general }) {
   ]
 
   return (
-    <footer className="bg-brand-900 text-white">
-      <div className="mx-auto grid max-w-[1500px] gap-10 px-4 py-14 sm:px-6 md:grid-cols-12 lg:px-10">
-        <div className="md:col-span-5">
-          <div className="font-display text-4xl italic">{general?.store_name || 'Inspofashions'}</div>
-          <p className="mt-4 max-w-sm text-sm leading-7 text-brand-200">
-            Premium clothing curated for easy everyday ordering. Choose your fit, send the order on WhatsApp, and we will confirm availability directly.
-          </p>
-          <p className="mt-6 text-sm text-brand-300">{footer?.company_info?.email || general?.support_email || 'help@inspofashions.com'}</p>
-        </div>
-        {sections.map((section) => (
-          <div key={section.id || section.title} className="md:col-span-2">
-            <h3 className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-brand-400">{section.title}</h3>
-            <ul className="space-y-3 text-sm">
-              {section.links?.map((link) => (
-                <li key={`${section.title}-${link.name}`}>
-                  <Link href={sanitizeUrl(link.url)} className="text-brand-100 hover:text-white">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+    <footer className="bg-white border-t border-gray-200 text-black">
+      <div className="mx-auto max-w-full px-6 sm:px-8 lg:px-16 py-16 sm:py-20">
+        <div className="grid gap-12 md:gap-16 md:grid-cols-4">
+          {/* Brand info */}
+          <div>
+            <div className="font-display text-2xl italic text-black mb-4">
+              {general?.store_name || 'Inspofashions'}
+            </div>
+            <p className="text-sm leading-6 text-black/70 mb-6 max-w-sm">
+              Premium clothing curated for easy everyday ordering.
+            </p>
+            {footer?.company_info?.email && (
+              <p className="text-sm text-black/60">{footer?.company_info?.email || general?.support_email}</p>
+            )}
           </div>
-        ))}
-      </div>
-      <div className="border-t border-white/10 px-4 py-5 text-center text-xs text-brand-400">
-        © {new Date().getFullYear()} {general?.store_name || 'Inspofashions'}. WhatsApp checkout only. No online payment is collected.
+
+          {/* Footer sections */}
+          {sections.map((section) => (
+            <div key={section.id || section.title}>
+              <h3 className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-black/80">
+                {section.title}
+              </h3>
+              <ul className="space-y-3 text-sm">
+                {section.links?.map((link) => (
+                  <li key={`${section.title}-${link.name}`}>
+                    <Link 
+                      href={sanitizeUrl(link.url)} 
+                      className="text-black/70 hover:text-black transition-colors duration-300"
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        {/* Copyright */}
+        <div className="border-t border-gray-200 mt-16 pt-8 text-center text-xs text-black/50">
+          © {new Date().getFullYear()} {general?.store_name || 'Inspofashions'}. WhatsApp checkout only.
+        </div>
       </div>
     </footer>
   )

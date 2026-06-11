@@ -13,7 +13,7 @@ export function ProductCard({ product, priority = false }) {
   return (
     <Link href={`/products/${product.slug}`} className="group block">
       <div 
-        className="relative aspect-[4/5] overflow-hidden bg-brand-100"
+        className="relative aspect-[3/4] overflow-hidden bg-gray-100 mb-4"
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
       >
@@ -25,13 +25,13 @@ export function ProductCard({ product, priority = false }) {
             fill
             priority={priority}
             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-            className={`object-cover transition-all duration-500 will-change-opacity ${
-              product.is_sold_out ? 'grayscale opacity-60' : 'group-hover:scale-105'
+            className={`object-cover transition-all duration-500 ${
+              product.is_sold_out ? 'grayscale opacity-50' : 'group-hover:scale-105'
             } ${isHovering && secondaryImage ? 'opacity-0' : 'opacity-100'}`}
           />
         )}
 
-        {/* Secondary image on hover (desktop only) */}
+        {/* Secondary image on hover */}
         {secondaryImage && (
           <Image
             src={secondaryImage}
@@ -39,35 +39,57 @@ export function ProductCard({ product, priority = false }) {
             fill
             priority={false}
             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-            className={`absolute inset-0 object-cover transition-all duration-500 will-change-opacity hidden sm:block ${
-              product.is_sold_out ? 'grayscale opacity-60' : 'group-hover:scale-105'
+            className={`absolute inset-0 object-cover transition-all duration-500 hidden sm:block ${
+              product.is_sold_out ? 'grayscale opacity-50' : 'group-hover:scale-105'
             } ${isHovering ? 'opacity-100' : 'opacity-0'}`}
           />
         )}
 
+        {/* Featured label */}
         {product.is_featured && (
-          <span className="absolute left-3 top-3 bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-brand-900 z-10">
+          <span className="absolute left-4 top-4 bg-black text-white px-3 py-1 text-[9px] font-bold uppercase tracking-[0.15em] z-10">
             Featured
           </span>
         )}
+
+        {/* Sold out overlay */}
         {product.is_sold_out && (
-          <span className="absolute inset-0 flex items-center justify-center bg-black/40 z-10">
-            <span className="bg-white px-6 py-2 text-sm font-bold uppercase tracking-[0.16em] text-brand-900">
+          <span className="absolute inset-0 flex items-center justify-center bg-white/60 z-10">
+            <span className="bg-black text-white px-6 py-2 text-xs font-bold uppercase tracking-[0.15em]">
               Sold Out
             </span>
           </span>
         )}
       </div>
-      <div className="mt-2 flex items-start justify-between gap-2">
-        <div className="min-w-0 flex-1">
-          <h3 className={`text-xs sm:text-sm font-semibold leading-tight group-hover:underline ${product.is_sold_out ? 'text-brand-400' : 'text-brand-900'}`}>{product.title}</h3>
-          <p className="mt-0.5 text-xs text-brand-500">{product.category}</p>
+
+      {/* Product info */}
+      <div className="space-y-2">
+        {/* Product name */}
+        <h3 className={`font-display text-base sm:text-lg leading-tight font-normal ${
+          product.is_sold_out ? 'text-gray-400' : 'text-black group-hover:text-black/70'
+        }`}>
+          {product.title}
+        </h3>
+
+        {/* Category and price */}
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-xs uppercase tracking-[0.1em] text-black/60">
+            {product.category}
+          </p>
+          <p className={`text-sm font-semibold ${
+            product.is_sold_out ? 'text-gray-400' : 'text-black'
+          }`}>
+            {formatPrice(product.price)}
+          </p>
         </div>
-        <p className={`shrink-0 text-xs sm:text-sm font-semibold ${product.is_sold_out ? 'text-brand-400' : ''}`}>{formatPrice(product.price)}</p>
+
+        {/* Colors info */}
+        {product.colors?.length > 0 && (
+          <p className="text-xs uppercase tracking-[0.1em] text-black/40">
+            {product.colors.length} colour{product.colors.length !== 1 ? 's' : ''}
+          </p>
+        )}
       </div>
-      {product.colors?.length > 0 && (
-        <p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-brand-500">{product.colors.length} colours</p>
-      )}
     </Link>
   )
 }

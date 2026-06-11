@@ -7,7 +7,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Allbirds-inspired earthy, natural palette
+        // Luxury monochrome palette
         brand: {
           50: '#fafaf9',
           100: '#f5f5f4',
@@ -56,6 +56,35 @@ export default {
         '88': '22rem',
         '112': '28rem',
         '128': '32rem',
+      },
+      animation: {
+        'slideInMenu': 'slideInMenu 260ms ease-out',
+        'slideInCart': 'slideInCart 260ms ease-out',
+        'fadeUp': 'fadeUp 600ms ease-out',
+        'fadeIn': 'fadeIn 800ms ease-out',
+        'zoom': 'zoom 1200ms ease-out',
+      },
+      keyframes: {
+        slideInMenu: {
+          'from': { transform: 'translateX(-100%)', opacity: '0' },
+          'to': { transform: 'translateX(0)', opacity: '1' },
+        },
+        slideInCart: {
+          'from': { transform: 'translateX(100%)', opacity: '0' },
+          'to': { transform: 'translateX(0)', opacity: '1' },
+        },
+        fadeUp: {
+          'from': { opacity: '0', transform: 'translateY(16px)' },
+          'to': { opacity: '1', transform: 'translateY(0)' },
+        },
+        fadeIn: {
+          'from': { opacity: '0' },
+          'to': { opacity: '1' },
+        },
+        zoom: {
+          'from': { transform: 'scale(1.05)', opacity: '0' },
+          'to': { transform: 'scale(1)', opacity: '1' },
+        },
       },
     },
   },

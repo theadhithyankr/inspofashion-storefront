@@ -15,62 +15,128 @@ export default async function HomePage() {
 
   return (
     <main>
-      <section className="relative flex min-h-[calc(100svh-104px)] items-end overflow-hidden">
-        <Image src={heroImage} alt="Inspofashions campaign" fill priority sizes="100vw" className="object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-black/5" />
-        <div className="relative mx-auto grid w-full max-w-[1500px] gap-8 px-4 pb-10 text-white sm:px-6 md:grid-cols-12 lg:px-10">
-          <div className="md:col-span-8 lg:col-span-7">
-            <p className="mb-4 text-xs font-bold uppercase tracking-[0.24em]">{clampText(hero?.subtitle, 'New Editorial Drop')}</p>
-            <h1 className="font-display text-5xl leading-[0.95] sm:text-7xl lg:text-8xl">
-              {clampText(hero?.title, 'Clothing that knows how to arrive.')}
-            </h1>
-          </div>
-          <div className="self-end md:col-span-4">
-            <p className="mb-6 max-w-sm text-sm leading-7 text-white/85">
-              Premium clothing, clear sizing, and a direct WhatsApp order flow. No payment gateway, no friction.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Link href={hero?.button_men_url || (collections[0] ? `/collections/${collections[0].slug}` : '/search')} className="bg-white px-5 py-3 text-xs font-bold uppercase tracking-[0.18em] text-brand-900">
-                {hero?.button_men || 'Shop Collection'}
-              </Link>
-              <Link href={hero?.button_women_url || '/search'} className="border border-white px-5 py-3 text-xs font-bold uppercase tracking-[0.18em] text-white">
-                {hero?.button_women || 'View All'}
-              </Link>
+      {/* Hero Section - Full width, 100vh desktop, responsive mobile */}
+      <section className="relative w-full h-screen lg:h-screen overflow-hidden bg-white">
+        {/* Full-width hero image with smart object-position for responsiveness */}
+        <Image 
+          src={heroImage} 
+          alt="Inspofashions campaign" 
+          fill 
+          priority 
+          sizes="100vw"
+          className="object-cover"
+          style={{
+            objectPosition: 'center center'
+          }}
+        />
+
+        {/* Subtle dark overlay for text readability */}
+        <div className="absolute inset-0 bg-black/15" />
+        
+        {/* Content - Left aligned on desktop, bottom-left on mobile */}
+        <div className="absolute inset-0 flex flex-col items-start justify-center lg:justify-center lg:items-start pt-20 lg:pt-0">
+          <div className="w-full px-6 sm:px-8 lg:px-12 pb-0 lg:pb-0">
+            <div className="max-w-md lg:max-w-2xl animate-[fadeIn_0.9s_ease-out_0.2s_forwards] opacity-0">
+              {/* Main heading - Large luxury serif */}
+              <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl leading-[1.1] mb-1 font-normal text-black">
+                {clampText(hero?.subtitle, 'Timeless Comfort.')}
+              </h1>
+              
+              {/* Second line of heading */}
+              <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl leading-[1.1] mb-6 font-normal text-black">
+                {clampText(hero?.title, 'Everyday Elegance.')}
+              </h2>
+              
+              {/* Decorative line - Luxury accent */}
+              <div className="w-12 h-0.5 bg-black mb-6"></div>
+              
+              {/* Description text - Premium copy */}
+              <p className="mb-8 text-xs sm:text-sm font-bold uppercase tracking-[0.18em] text-black/90 leading-relaxed">
+                Premium Nightwear<br />
+                Designed for Modern Women.
+              </p>
+              
+              {/* Call-to-action buttons */}
+              <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
+                <Link 
+                  href={hero?.button_men_url || (collections[0] ? `/collections/${collections[0].slug}` : '/search')} 
+                  className="px-6 sm:px-8 py-2.5 sm:py-3 bg-black text-white font-bold text-xs uppercase tracking-[0.18em] hover:bg-black/90 transition-all duration-300"
+                >
+                  {hero?.button_men || 'Shop Collection'}
+                </Link>
+                
+                <Link 
+                  href={hero?.button_women_url || '/search'} 
+                  className="px-6 sm:px-8 py-2.5 sm:py-3 border-2 border-black text-black font-bold text-xs uppercase tracking-[0.18em] hover:bg-black hover:text-white transition-all duration-300 bg-white/80 sm:bg-transparent"
+                >
+                  {hero?.button_women || 'Shop Women'}
+                </Link>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1500px] px-4 py-14 sm:px-6 lg:px-10">
-        <div className="mb-8 flex items-end justify-between gap-4">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#6f1d1b]">Collections</p>
-            <h2 className="mt-2 font-display text-4xl text-brand-900">Shop by mood</h2>
+      {/* Shop by Mood Section - Simple grid layout */}
+      <section className="bg-white py-20 sm:py-24 lg:py-32">
+        <div className="mx-auto max-w-full px-6 sm:px-8 lg:px-16">
+          {/* Section header */}
+          <div className="mb-12 lg:mb-16">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-black/70 mb-3">Collections</p>
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl text-black font-normal">
+              Shop by mood
+            </h2>
           </div>
-          <Link href="/search" className="hidden items-center gap-2 text-sm font-bold uppercase tracking-[0.14em] sm:flex">
-            All pieces <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {collections.slice(0, 4).map((collection, index) => (
-            <Link key={collection.id} href={`/collections/${collection.slug}`} className={`group relative min-h-[360px] overflow-hidden bg-brand-100 ${index === 0 ? 'lg:col-span-2' : ''}`}>
-              {collection.image_url && <Image src={collection.image_url} alt={collection.name} fill sizes="(max-width: 1024px) 50vw, 25vw" className="object-cover transition duration-700 group-hover:scale-105" />}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-              <div className="absolute inset-x-0 bottom-0 p-5 text-white">
-                <h3 className="font-display text-3xl">{collection.name}</h3>
-                {collection.description && <p className="mt-2 max-w-md text-sm leading-6 text-white/80">{collection.description}</p>}
-              </div>
-            </Link>
-          ))}
+
+          {/* Collection cards grid - 2x2 on desktop, responsive on mobile */}
+          <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 auto-rows-[300px] sm:auto-rows-[350px] lg:auto-rows-[400px]">
+            {collections.slice(0, 4).map((collection) => (
+              <Link 
+                key={collection.id} 
+                href={`/collections/${collection.slug}`} 
+                className="group relative overflow-hidden bg-gray-200"
+              >
+                {collection.image_url && (
+                  <Image 
+                    src={collection.image_url} 
+                    alt={collection.name} 
+                    fill 
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 50vw" 
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                )}
+                
+                {/* Subtle overlay */}
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors duration-300" />
+                
+                {/* Content */}
+                <div className="absolute inset-0 flex items-end p-6 sm:p-8">
+                  <div>
+                    <h3 className="font-display text-2xl sm:text-3xl text-white font-normal">
+                      {collection.name}
+                    </h3>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1500px] px-4 py-14 sm:px-6 lg:px-10">
-        <div className="mb-8">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#6f1d1b]">New arrivals</p>
-          <h2 className="mt-2 font-display text-4xl text-brand-900">The current edit</h2>
+      {/* New Arrivals Section */}
+      <section className="bg-white py-20 sm:py-24 lg:py-32">
+        <div className="mx-auto max-w-full px-6 sm:px-8 lg:px-16">
+          {/* Section header */}
+          <div className="mb-12 lg:mb-16">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-black/70 mb-3">New Arrivals</p>
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl text-black font-normal">
+              The current edit
+            </h2>
+          </div>
+          
+          {/* Product grid */}
+          <ProductGrid products={newArrivals} priorityCount={4} />
         </div>
-        <ProductGrid products={newArrivals} priorityCount={4} />
       </section>
     </main>
   )
