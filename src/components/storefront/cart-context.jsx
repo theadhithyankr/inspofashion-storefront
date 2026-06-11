@@ -35,6 +35,8 @@ export function CartProvider({ children }) {
   const addToCart = (product, options) => {
     const color = options.color || null
     const size = options.size
+    const variantId = options.variantId || null  // ✅ NEW
+    const sku = options.sku || null              // ✅ NEW
     const quantity = Number(options.quantity || 1)
 
     setItems((current) => {
@@ -50,14 +52,16 @@ export function CartProvider({ children }) {
         }
       } else {
         next.push({
-          id: `${product.id}-${size}-${color || 'default'}-${Date.now()}`,
+          id: `${product.id}-${size}-${variantId || 'default'}-${Date.now()}`,
           productId: product.id,
+          variantId: variantId,  // ✅ NEW: Store variant ID
           slug: product.slug,
           title: product.title,
           price: Number(product.price),
           imageUrl: options.imageUrl || getVariantImageForColor(product, color) || product.images?.[0] || product.image_url,
           size,
           color,
+          sku: sku,              // ✅ NEW: Store SKU
           quantity,
         })
       }

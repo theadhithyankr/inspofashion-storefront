@@ -207,18 +207,87 @@ export function clampText(value = '', fallback = '') {
   return value?.toString().trim() || fallback
 }
 
+/**
+ * Create a normalized map of color names to variant metadata
+ * Enables efficient color → variant lookups
+ * @param {object[]} variants - Array of variant objects
+ * @returns {object} Map of normalized color names to variant metadata
+ */
+export function createVariantMap(variants = []) {
+  const map = {}
+  
+  if (!Array.isArray(variants)) return map
+  
+  variants.forEach((variant) => {
+    if (!variant) return
+    
+    const colorName = variant.color || variant.name || variant.option1 || ''
+    if (!colorName) return
+    
+    const normalized = compactColorName(colorName)
+    if (!normalized) return
+    
+    // Store variant metadata keyed by normalized color name
+    map[normalized] = {
+      id: variant.id,
+      color: colorName,
+      color_code: variant.color_code || null,
+      sku: variant.sku || null,
+      stock: variant.stock || 0,
+      images: Array.isArray(variant.images) ? variant.images : [],
+      price: variant.price || null,
+    }
+  })
+  
+  return map
+}
+
+/**
+ * Get variant by color name (case-insensitive)
+ * @param {object} variantMap - Map created by createVariantMap()
+ * @param {string} colorName - Color name to look up
+ * @returns {object|null} Variant metadata or null
+ */
+export function getVariantByColorName(variantMap, colorName) {
+  if (!variantMap || typeof variantMap !== 'object') return null
+  
+  const normalized = compactColorName(colorName)
+  return variantMap[normalized] || null
+}
+
+/**
+ * DEPRECATED: Use getColorCodeFromVariant() instead
+ * This function is kept for backward compatibility only
+ * @deprecated Use variant.color_code from backend data
+ */
 export function getColorHex(colorName) {
-  const colorMap = {
-    'red': '#dc2626', 'blue': '#2563eb', 'green': '#16a34a', 'yellow': '#eab308',
-    'orange': '#ea580c', 'purple': '#9333ea', 'pink': '#ec4899', 'black': '#1f2937',
-    'white': '#f5f5f5', 'gray': '#6b7280', 'grey': '#6b7280', 'brown': '#92400e',
-    'beige': '#dcc8a3', 'navy': '#001f3f', 'cream': '#fffdd0', 'gold': '#fbbf24',
-    'silver': '#d1d5db', 'bronze': '#b45309', 'copper': '#b7410e', 'rose': '#fb7185',
-    'maroon': '#800000', 'coral': '#ff7f50', 'teal': '#14b8a6', 'mint': '#a7f3d0',
-    'sage': '#c4b5a0', 'khaki': '#f0e68c', 'olive': '#808000', 'tan': '#d2b48c',
-    'peach': '#ffbe98', 'lavender': '#e6e6fa', 'indigo': '#4b0082',
+  console.warn('[DEPRECATED] getColorHex() is deprecated. Use backend color_code instead.')
+  
+  // Minimal fallback for compatibility (removed full map)
+  const fallbackMap = {
+    'red': '#dc2626', 'blue': '#2563eb', 'green': '#16a34a',
+    'black': '#1f2937', 'white': '#f5f5f5', 'navy': '#001f3f',
+    'maroon': '#800000', 'dark green': '#006400', 'dark blue': '#00008B',
   }
-  return colorMap[colorName?.toLowerCase()] || '#e5e7eb'
+  return fallbackMap[colorName?.toLowerCase()] || '#d1d5db'
+}
+
+/**
+ * Get color code directly from variant object (PRIMARY METHOD)
+ * This should be used instead of getColorHex()
+ * @param {object} variant - Variant object with color_code
+ * @returns {string|null} Valid hex color code or null
+ */
+export function getColorCodeFromVariant(variant) {
+  if (!variant?.color_code) return null
+  
+  const hex = variant.color_code
+  if (!/^#[0-9A-Fa-f]{6}$/i.test(hex)) {
+    console.error(`[Color] Invalid hex format: ${hex}`)
+    return null
+  }
+  
+  return hex
 }
 
 export function extractColorsFromImages(images = []) {

@@ -5,6 +5,10 @@ import { Minus, Plus, ShoppingBag } from 'lucide-react'
 import { formatPrice } from '@/lib/format'
 import { useCart } from './cart-context'
 
+function normalizeColorForCompare(value = '') {
+  return value?.toString().trim().toLowerCase().replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim()
+}
+
 export function ProductPurchasePanel({ product, selectedColor }) {
   const availableSizes = useMemo(() => product.sizes?.filter(Boolean) || [], [product.sizes])
   const [size, setSize] = useState(availableSizes[0] || 'One Size')
@@ -16,6 +20,14 @@ export function ProductPurchasePanel({ product, selectedColor }) {
 
   // Use selectedColor from props, fallback to first color
   const color = selectedColor || product.colors?.[0] || ''
+
+  // ✅ NEW: Get variant metadata
+  const variantMap = useMemo(() => product.variantMap || {}, [product.variantMap])
+  const variant = useMemo(() => {
+    if (!color) return null
+    const normalized = normalizeColorForCompare(color)
+    return variantMap[normalized] || null
+  }, [color, variantMap])
 
   useEffect(() => {
     if (!openCartAtCountRef.current || totalItems < openCartAtCountRef.current) return
@@ -29,13 +41,31 @@ export function ProductPurchasePanel({ product, selectedColor }) {
       return false
     }
 
+    // ✅ NEW: Validate variant exists
+    if (!variant) {
+      setError(`Color variant not available: ${color}`)
+      return false
+    }
+
+    // ✅ NEW: Check stock per variant
+    if (variant.stock <= 0) {
+      setError(`${color} is currently out of stock.`)
+      return false
+    }
+
     if (!size) {
       setError('Choose a size before adding this piece.')
       return false
     }
 
     setError('')
-    addToCart(product, { size, color, quantity })
+    addToCart(product, {
+      size,
+      color,
+      variantId: variant.id,    // ✅ NEW: Pass variant ID
+      sku: variant.sku,          // ✅ NEW: Pass SKU
+      quantity,
+    })
     setAdded(true)
     openCartAtCountRef.current = totalItems + quantity
     window.setTimeout(() => setAdded(false), 1800)
@@ -47,6 +77,11 @@ export function ProductPurchasePanel({ product, selectedColor }) {
       {product.is_sold_out && (
         <div className="mb-6 border border-orange-300 bg-orange-50 px-4 py-3">
           <p className="text-sm font-semibold text-orange-900">This product is currently sold out.</p>
+        </div>
+      )}
+      {variant?.stock === 0 && !product.is_sold_out && (
+        <div className="mb-6 border border-orange-300 bg-orange-50 px-4 py-3">
+          <p className="text-sm font-semibold text-orange-900">{color} is currently out of stock, but other colours are available.</p>
         </div>
       )}
       <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-500">{product.category}</p>
@@ -64,6 +99,14 @@ export function ProductPurchasePanel({ product, selectedColor }) {
           <div className="mb-5 rounded-2xl border border-brand-100 bg-brand-50 px-4 py-3">
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-brand-500">Selected colour</p>
             <p className="mt-1 text-sm font-semibold text-brand-900">{color}</p>
+            {variant?.sku && (
+              <p className="mt-2 text-xs text-brand-500">SKU: {variant.sku}</p>
+            )}
+            {variant && (
+              <p className={`mt-1 text-xs font-medium ${variant.stock > 0 ? 'text-green-600' : 'text-orange-600'}`}>
+                {variant.stock > 0 ? `${variant.stock} in stock` : 'Out of stock'}
+              </p>
+            )}
           </div>
         )}
         <div className="mb-3 flex items-center justify-between">
@@ -114,12 +157,12 @@ export function ProductPurchasePanel({ product, selectedColor }) {
       </div>
 
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-brand-200 bg-white/95 p-3 shadow-[0_-12px_40px_rgba(28,25,23,0.08)] backdrop-blur lg:static lg:mt-8 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none">
-        {product.is_sold_out ? (
+        {product.is_sold_out || !variant || variant.stock === 0 ? (
           <button
             disabled
             className="flex w-full items-center justify-center gap-2 px-6 py-4 font-bold uppercase tracking-[0.16em] text-white bg-brand-300 cursor-not-allowed"
           >
-            Sold Out
+            {!variant ? 'Color Not Available' : 'Out of Stock'}
           </button>
         ) : (
           <button

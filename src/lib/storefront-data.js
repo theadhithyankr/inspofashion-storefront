@@ -1,6 +1,6 @@
 import { cache } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { getCollectionSlug, getProductImages, getProductSlug, getProductVariantColors, slugify, extractColorsFromImages, extractColorsFromTags } from './format'
+import { getCollectionSlug, getProductImages, getProductSlug, getProductVariantColors, slugify, extractColorsFromImages, extractColorsFromTags, createVariantMap } from './format'
 
 const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY
@@ -36,6 +36,9 @@ function normalizeProduct(product) {
     colors = extractColorsFromTags(product.tags)
   }
 
+  // ✅ NEW: Create variant map for efficient color lookups
+  const variantMap = createVariantMap(product.variants)
+
   return {
     ...product,
     slug: product.slug || slugify(product.title),
@@ -46,6 +49,7 @@ function normalizeProduct(product) {
     tags: Array.isArray(product.tags) ? product.tags : [],
     quantity: Number(product.quantity || 0),
     is_sold_out: Number(product.quantity || 0) === 0,
+    variantMap, // ✅ NEW: Add variant metadata map
   }
 }
 

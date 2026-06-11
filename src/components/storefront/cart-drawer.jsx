@@ -91,6 +91,9 @@ export function CartDrawer({ isOpen, onClose, whatsappNumber }) {
                         {item.title}
                       </Link>
                       <p className="mt-1 text-sm text-brand-500">Size {item.size}{item.color ? ` / ${item.color}` : ''}</p>
+                      {item.sku && (
+                        <p className="text-xs text-brand-400">SKU: {item.sku}</p>
+                      )}
                       <div className="mt-4 flex items-center justify-between">
                         <div className="flex items-center border border-brand-200 bg-white">
                           <button className="p-2 transition hover:bg-brand-50" onClick={() => updateQuantity(item.id, item.quantity - 1)} aria-label="Decrease quantity">
