@@ -1,7 +1,8 @@
 'use client'
 
-import { useMemo, useEffect, useState } from 'react'
+import { useMemo, useEffect, useState, useRef } from 'react'
 import Image from 'next/image'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { getProductVariantColors, getProductVariantImages } from '@/lib/format'
 import { getColorCodeWithFallback, isLightColor } from '@/lib/color-validation'
 import { preloadVariantImages } from '@/lib/image-cache'
@@ -19,6 +20,10 @@ function getDisplayColor(product, color) {
 export function ProductVariantGallery({ product, selectedColor, onColorChange }) {
   // ✅ NEW: Preload variant images on mount
   const [preloadStatus, setPreloadStatus] = useState('idle')
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [touchStart, setTouchStart] = useState(null)
+  const [touchEnd, setTouchEnd] = useState(null)
+  const galleryRef = useRef(null)
 
   useEffect(() => {
     if (!product?.variants?.length) return
@@ -41,45 +46,118 @@ export function ProductVariantGallery({ product, selectedColor, onColorChange })
   const mappedImages = activeColor ? getProductVariantImages(product, activeColor) : []
   const galleryImages = mappedImages.length > 0 ? mappedImages : product.images || []
 
+  // Reset image index when color changes
+  useEffect(() => {
+    setCurrentImageIndex(0)
+  }, [activeColor])
+
+  const handlePrevImage = () => {
+    setCurrentImageIndex((prev) => (prev === 0 ? galleryImages.length - 1 : prev - 1))
+  }
+
+  const handleNextImage = () => {
+    setCurrentImageIndex((prev) => (prev === galleryImages.length - 1 ? 0 : prev + 1))
+  }
+
+  // Touch swipe handlers
+  const handleTouchStart = (e) => setTouchStart(e.targetTouches[0].clientX)
+  const handleTouchEnd = (e) => setTouchEnd(e.changedTouches[0].clientX)
+
+  useEffect(() => {
+    if (!touchStart || !touchEnd) return
+    
+    const distance = touchStart - touchEnd
+    const isLeftSwipe = distance > 50
+    const isRightSwipe = distance < -50
+
+    if (isLeftSwipe) handleNextImage()
+    if (isRightSwipe) handlePrevImage()
+  }, [touchStart, touchEnd])
+
   if (galleryImages.length === 0) {
     return (
-      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-brand-100" />
+      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-lg bg-black/5" />
     )
   }
 
   return (
     <div>
-      <div className="grid gap-3 sm:grid-cols-2">
-        {galleryImages.map((image, index) => (
-          <div key={`${image}-${index}`} className={`relative aspect-[4/5] overflow-hidden rounded-2xl bg-brand-100 ${index === 0 ? 'sm:col-span-2' : ''}`}>
-            <Image
-              src={image}
-              alt={index === 0 ? product.title : `${product.title} ${activeColor || `image ${index + 1}`}`}
-              fill
-              priority={index === 0}
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover"
-            />
-          </div>
-        ))}
+      {/* Slideshow container */}
+      <div 
+        ref={galleryRef}
+        className="relative w-full overflow-hidden rounded-lg bg-black/5 aspect-[3/4]"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        {/* Main image */}
+        <div className="relative w-full h-full">
+          <Image
+            src={galleryImages[currentImageIndex]}
+            alt={`${product.title} - ${activeColor || `image ${currentImageIndex + 1}`}`}
+            fill
+            priority
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="object-cover transition-opacity duration-300"
+          />
+        </div>
+
+        {/* Navigation buttons - Only show if multiple images */}
+        {galleryImages.length > 1 && (
+          <>
+            <button
+              onClick={handlePrevImage}
+              className="absolute left-3 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/60 text-white p-2 rounded-full transition-colors duration-300"
+              aria-label="Previous image"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <button
+              onClick={handleNextImage}
+              className="absolute right-3 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/60 text-white p-2 rounded-full transition-colors duration-300"
+              aria-label="Next image"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+
+            {/* Image counter */}
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 bg-black/50 text-white px-3 py-1 rounded-full text-xs font-semibold">
+              {currentImageIndex + 1} / {galleryImages.length}
+            </div>
+
+            {/* Dot indicators */}
+            <div className="absolute bottom-14 left-1/2 -translate-x-1/2 z-20 flex gap-1.5">
+              {galleryImages.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentImageIndex(index)}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    index === currentImageIndex ? 'bg-white w-6' : 'bg-white/50 w-1.5'
+                  }`}
+                  aria-label={`Go to image ${index + 1}`}
+                />
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
+      {/* Color selection */}
       {colors.length > 0 && (
-        <div className="mt-6 rounded-2xl border border-brand-100 bg-white p-4 shadow-sm">
+        <div className="mt-6 rounded-lg border border-black/10 bg-white p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-500">Colour</p>
-              <p className="mt-1 text-sm font-semibold text-brand-900">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-black/60">Colour</p>
+              <p className="mt-1 text-sm font-semibold text-black">
                 {activeColor ? `Selected: ${getDisplayColor(product, activeColor)}` : 'Choose a colour'}
               </p>
             </div>
             {mappedImages.length > 0 && (
-              <p className="text-xs text-brand-500">{mappedImages.length} image{mappedImages.length > 1 ? 's' : ''} for this colour</p>
+              <p className="text-xs text-black/60">{mappedImages.length} image{mappedImages.length > 1 ? 's' : ''} for this colour</p>
             )}
           </div>
 
           {preloadStatus === 'loading' && (
-            <p className="mt-2 text-xs text-brand-500">Loading images...</p>
+            <p className="mt-2 text-xs text-black/60">Loading images...</p>
           )}
 
           <div className="mt-4 flex flex-wrap gap-3">
@@ -112,15 +190,15 @@ export function ProductVariantGallery({ product, selectedColor, onColorChange })
                   aria-label={`${color}${isOutOfStock ? ' (out of stock)' : ''}`}
                   className={`flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-semibold transition ${
                     isActive
-                      ? 'border-brand-900 bg-brand-900 text-white'
+                      ? 'border-black bg-black text-white'
                       : isOutOfStock
-                        ? 'border-brand-200 bg-brand-50 text-brand-400 cursor-not-allowed opacity-50'
-                        : 'border-brand-200 bg-white text-brand-900 hover:border-brand-900'
+                        ? 'border-black/15 bg-black/5 text-black/40 cursor-not-allowed opacity-50'
+                        : 'border-black/15 bg-white text-black hover:border-black'
                   }`}
                 >
                   <span
                     className={`relative h-7 w-7 rounded-full border ${
-                      isLightSwatch ? 'border-brand-300' : 'border-white'
+                      isLightSwatch ? 'border-black/30' : 'border-white'
                     } shadow-sm`}
                     style={{ backgroundColor: hex }}
                     aria-hidden="true"

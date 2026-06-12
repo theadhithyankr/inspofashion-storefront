@@ -98,22 +98,24 @@ function Header({ menu, general, products, collections, onCartClick }) {
             </nav>
 
             {/* Search & Cart - Right */}
-            <div className="flex items-center justify-end gap-8 flex-shrink-0">
+            <div className="flex items-center justify-end gap-6 sm:gap-8 flex-shrink-0">
               {/* Mobile Menu Button */}
-              <button className="lg:hidden p-2 hover:bg-white/20 rounded transition-colors" onClick={() => setMenuOpen(true)} aria-label="Open menu">
+              <button className="lg:hidden p-2 hover:scale-105 transition-transform duration-200" onClick={() => setMenuOpen(true)} aria-label="Open menu">
                 <Menu className="h-5 w-5 text-black" />
               </button>
 
-              {/* Desktop Icons */}
+              {/* Search Icon - Mobile & Desktop */}
               <button 
-                className="hidden sm:block p-2 hover:bg-white/20 rounded transition-colors" 
+                className="p-2 hover:scale-105 transition-transform duration-200" 
                 onClick={() => setSearchOpen(true)} 
                 aria-label="Search"
               >
                 <Search className="h-5 w-5 text-black" />
               </button>
+
+              {/* Cart Icon */}
               <button 
-                className="relative p-2 hover:bg-white/20 rounded transition-colors" 
+                className="relative p-2 hover:scale-105 transition-transform duration-200" 
                 onClick={onCartClick} 
                 aria-label="Open cart"
               >
@@ -131,61 +133,76 @@ function Header({ menu, general, products, collections, onCartClick }) {
 
       {menuOpen && (
       <div className="fixed inset-0 z-50 lg:hidden">
+        {/* Dark overlay backdrop */}
         <button
-          className="absolute inset-0 bg-black/30"
+          className="absolute inset-0 bg-black/45 transition-opacity duration-300"
           onClick={() => setMenuOpen(false)}
           aria-label="Close menu"
         />
-        <div className="relative flex h-full w-[85vw] max-w-sm flex-col bg-white p-6 sm:p-8 shadow-2xl animate-[slideInMenu_260ms_ease-out]">
+        
+        {/* Side drawer - Fixed position */}
+        <div className="fixed top-0 left-0 bottom-0 w-[82vw] max-w-xs flex flex-col bg-white backdrop-blur-sm z-50 animate-[slideInLeft_300ms_ease-out] shadow-lg">
           {/* Header with close button */}
-          <div className="mb-8 flex items-center justify-between border-b border-[#EAE0E0] pb-6">
-            <span className="font-display text-2xl sm:text-3xl italic text-black">{general?.store_name || 'Inspofashions'}</span>
+          <div className="flex items-center justify-between border-b border-black/10 px-6 py-4">
+            <span className="font-display text-xl italic text-black">{general?.store_name || 'Inspofashions'}</span>
             <button 
-              className="rounded-full border border-black/20 p-2 transition hover:bg-[#FAF5F5]" 
+              className="rounded-full p-1.5 hover:bg-black/5 transition-colors duration-300" 
               onClick={() => setMenuOpen(false)} 
               aria-label="Close menu"
             >
-              <X className="h-5 w-5 text-black" />
+              <X className="h-4 w-4 text-black" />
             </button>
           </div>
 
           {/* Navigation links */}
-          <nav className="flex-1 space-y-0">
-            <p className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-black/60">Collections</p>
-            {navLinks.map((link) => (
+          <nav className="flex-1 overflow-y-auto">
+            <p className="px-6 pt-6 pb-3 text-xs font-bold uppercase tracking-[0.2em] text-black/60">Collections</p>
+            
+            {navLinks.map((link, index) => (
               <Link
                 key={`${link.name}-${link.url}`}
                 href={sanitizeUrl(link.url)}
                 onClick={() => setMenuOpen(false)}
-                className="group flex items-center justify-between border-b border-[#F0EDED] py-4 text-base font-semibold text-black hover:text-black/70 transition-colors"
+                className="group flex items-center justify-between border-b border-black/8 px-6 py-4 text-sm font-semibold text-black hover:bg-black/2 transition-colors duration-300"
               >
                 <span>{link.name}</span>
-                <span className="text-black/30 transition group-hover:translate-x-1 group-hover:text-black">→</span>
+                <span className="text-black/30 transition-all duration-300 group-hover:translate-x-1 group-hover:text-black/70">→</span>
               </Link>
             ))}
 
-            {/* Additional links */}
-            <div className="space-y-0 border-t border-[#EAE0E0] mt-6 pt-6">
+            {/* Additional links section */}
+            <div className="border-t border-black/10 mt-4">
+              <p className="px-6 pt-6 pb-3 text-xs font-bold uppercase tracking-[0.2em] text-black/60">Help</p>
               <Link 
                 href="/shipping-returns" 
                 onClick={() => setMenuOpen(false)} 
-                className="block border-b border-[#F0EDED] py-4 text-base font-semibold text-black hover:text-black/70"
+                className="group flex items-center justify-between border-b border-black/8 px-6 py-4 text-sm font-semibold text-black hover:bg-black/2 transition-colors duration-300"
               >
-                Shipping & Returns
+                <span>Shipping & Returns</span>
+                <span className="text-black/30 transition-all duration-300 group-hover:translate-x-1 group-hover:text-black/70">→</span>
+              </Link>
+              <Link 
+                href="/size-guide" 
+                onClick={() => setMenuOpen(false)} 
+                className="group flex items-center justify-between border-b border-black/8 px-6 py-4 text-sm font-semibold text-black hover:bg-black/2 transition-colors duration-300"
+              >
+                <span>Size Guide</span>
+                <span className="text-black/30 transition-all duration-300 group-hover:translate-x-1 group-hover:text-black/70">→</span>
               </Link>
               <Link 
                 href="/contact" 
                 onClick={() => setMenuOpen(false)} 
-                className="block py-4 text-base font-semibold text-black hover:text-black/70"
+                className="group flex items-center justify-between px-6 py-4 text-sm font-semibold text-black hover:bg-black/2 transition-colors duration-300"
               >
-                Contact
+                <span>Contact</span>
+                <span className="text-black/30 transition-all duration-300 group-hover:translate-x-1 group-hover:text-black/70">→</span>
               </Link>
             </div>
           </nav>
 
           {/* Footer text */}
-          <div className="border-t border-[#EAE0E0] pt-6 text-xs leading-6 text-black/60">
-            Premium clothing curated for easy everyday ordering. Choose your fit, send the order on WhatsApp.
+          <div className="border-t border-black/10 px-6 py-6 text-xs leading-6 text-black/60">
+            Premium clothing curated for easy everyday ordering.
           </div>
         </div>
       </div>

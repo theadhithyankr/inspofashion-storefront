@@ -5,17 +5,32 @@ import { getCollectionSlug, getProductImages, getProductSlug, getProductVariantC
 const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY
 
+let supabaseInstance = null
+
 function getSupabase() {
   if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error('Missing Supabase environment variables for storefront.')
   }
 
-  return createClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  })
+  // Reuse single Supabase instance to prevent connection pooling issues
+  if (!supabaseInstance) {
+    supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+      db: {
+        schema: 'public',
+      },
+      global: {
+        headers: {
+          'X-Client-Info': 'storefront@1.0.0',
+        },
+      },
+    })
+  }
+
+  return supabaseInstance
 }
 
 function normalizeProduct(product) {
@@ -61,50 +76,79 @@ function normalizeCollection(collection) {
 }
 
 export const getProducts = cache(async () => {
-  const { data, error } = await getSupabase()
-    .from('products')
-    .select('*')
-    .eq('is_active', true)
-    .order('created_at', { ascending: false })
+  try {
+    const { data, error } = await getSupabase()
+      .from('products')
+      .select('*', { count: 'estimated' })
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
 
-  if (error) throw error
-  return (data || []).map(normalizeProduct)
+    if (error) {
+      console.error('Error fetching products:', error)
+      throw error
+    }
+    return (data || []).map(normalizeProduct)
+  } catch (err) {
+    console.error('Failed to fetch products:', err)
+    return []
+  }
 })
 
 export const getCollections = cache(async () => {
-  const { data, error } = await getSupabase()
-    .from('collections')
-    .select('*')
-    .eq('is_active', true)
-    .order('created_at', { ascending: false })
+  try {
+    const { data, error } = await getSupabase()
+      .from('collections')
+      .select('*', { count: 'estimated' })
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
 
-  if (error) throw error
-  return (data || []).map(normalizeCollection)
+    if (error) {
+      console.error('Error fetching collections:', error)
+      throw error
+    }
+    return (data || []).map(normalizeCollection)
+  } catch (err) {
+    console.error('Failed to fetch collections:', err)
+    return []
+  }
 })
 
 export const getSetting = cache(async (key) => {
-  const { data, error } = await getSupabase()
-    .from('store_settings')
-    .select('value')
-    .eq('key', key)
-    .single()
+  try {
+    const { data, error } = await getSupabase()
+      .from('store_settings')
+      .select('value', { count: 'estimated' })
+      .eq('key', key)
+      .maybeSingle()
 
-  if (error && error.code !== 'PGRST116') throw error
-  return data?.value || null
+    if (error && error.code !== 'PGRST116') {
+      console.error('Error fetching setting:', error)
+      throw error
+    }
+    return data?.value || null
+  } catch (err) {
+    console.error('Failed to fetch setting:', err)
+    return null
+  }
 })
 
 export const getStorefrontData = cache(async () => {
-  const [products, collections, hero, menu, footer, valueProps, general] = await Promise.all([
-    getProducts(),
-    getCollections(),
-    getSetting('hero_section'),
-    getSetting('menu_bar'),
-    getSetting('footer_settings'),
-    getSetting('value_props'),
-    getSetting('general_settings'),
-  ])
+  try {
+    const [products, collections, hero, menu, footer, valueProps, general] = await Promise.all([
+      getProducts(),
+      getCollections(),
+      getSetting('hero_section'),
+      getSetting('menu_bar'),
+      getSetting('footer_settings'),
+      getSetting('value_props'),
+      getSetting('general_settings'),
+    ])
 
-  return { products, collections, hero, menu, footer, valueProps, general }
+    return { products, collections, hero, menu, footer, valueProps, general }
+  } catch (err) {
+    console.error('Failed to fetch storefront data:', err)
+    return { products: [], collections: [], hero: null, menu: null, footer: null, valueProps: null, general: null }
+  }
 })
 
 export async function getProductBySlug(slug) {

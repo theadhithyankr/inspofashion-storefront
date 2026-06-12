@@ -55,7 +55,7 @@ export default async function ProductPage({ params }) {
   return (
     <main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <section className="mx-auto grid max-w-[1500px] gap-10 px-4 py-8 pb-28 sm:px-6 lg:grid-cols-2 lg:px-10 lg:pb-16">
+      <section className="mx-auto grid max-w-[1500px] gap-10 px-4 py-8 pt-24 sm:pt-28 lg:pt-24 pb-28 sm:px-6 lg:grid-cols-2 lg:px-10 lg:pb-16">
         <ProductPageClient product={product} />
       </section>
 

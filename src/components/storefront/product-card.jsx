@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
 import { formatPrice } from '@/lib/format'
+import { SoldOutBadge } from './sold-out-badge'
 
 export function ProductCard({ product, priority = false }) {
   const [isHovering, setIsHovering] = useState(false)
@@ -26,7 +27,7 @@ export function ProductCard({ product, priority = false }) {
             priority={priority}
             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
             className={`object-cover transition-all duration-500 ${
-              product.is_sold_out ? 'grayscale opacity-50' : 'group-hover:scale-105'
+              product.is_sold_out ? 'grayscale' : 'group-hover:scale-105'
             } ${isHovering && secondaryImage ? 'opacity-0' : 'opacity-100'}`}
           />
         )}
@@ -40,9 +41,14 @@ export function ProductCard({ product, priority = false }) {
             priority={false}
             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
             className={`absolute inset-0 object-cover transition-all duration-500 hidden sm:block ${
-              product.is_sold_out ? 'grayscale opacity-50' : 'group-hover:scale-105'
+              product.is_sold_out ? 'grayscale' : 'group-hover:scale-105'
             } ${isHovering ? 'opacity-100' : 'opacity-0'}`}
           />
+        )}
+
+        {/* Soft backdrop blur overlay for sold out */}
+        {product.is_sold_out && (
+          <div className="absolute inset-0 backdrop-blur-sm bg-black/3 z-10 transition-opacity duration-500 opacity-100" />
         )}
 
         {/* Featured label */}
@@ -52,14 +58,8 @@ export function ProductCard({ product, priority = false }) {
           </span>
         )}
 
-        {/* Sold out overlay */}
-        {product.is_sold_out && (
-          <span className="absolute inset-0 flex items-center justify-center bg-white/60 z-10">
-            <span className="bg-black text-white px-6 py-2 text-xs font-bold uppercase tracking-[0.15em]">
-              Sold Out
-            </span>
-          </span>
-        )}
+        {/* Sold out badge */}
+        {product.is_sold_out && <SoldOutBadge position="center" />}
       </div>
 
       {/* Product info */}

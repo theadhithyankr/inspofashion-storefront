@@ -13,14 +13,28 @@ export default async function SearchPage({ searchParams }) {
   const results = query ? searchProducts(products, query) : products
 
   return (
-    <main className="mx-auto max-w-[1500px] px-4 py-12 sm:px-6 lg:px-10">
-      <header className="mb-10 max-w-3xl">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#6f1d1b]">Search</p>
-        <h1 className="mt-3 font-display text-5xl text-brand-900 sm:text-7xl">
-          {query ? `Results for "${query}"` : 'All pieces'}
-        </h1>
+    <main className="w-full bg-white">
+      {/* Header with fixed padding from top (accounts for header) */}
+      <header className="px-6 sm:px-8 lg:px-16 pt-24 sm:pt-28 lg:pt-24 pb-8 sm:pb-12 border-b border-black/10">
+        <div className="max-w-4xl">
+          {/* Search title - Premium serif */}
+          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl leading-[1.1] text-black mb-4 font-normal">
+            {query ? `Results for "${query}"` : 'All pieces'}
+          </h1>
+          
+          {/* Description - Premium body text */}
+          {query && (
+            <p className="text-sm sm:text-base leading-7 text-black/70">
+              Showing all items matching your search.
+            </p>
+          )}
+        </div>
       </header>
-      <CollectionBrowser products={results} />
+
+      {/* Collection browser - Full width */}
+      <div className="px-6 sm:px-8 lg:px-16 py-8 sm:py-12">
+        <CollectionBrowser products={results} />
+      </div>
     </main>
   )
 }
