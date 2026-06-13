@@ -60,9 +60,9 @@ export function SoldOutBadge() {
 
         .badge-hook {
           display: block;
-          height: 70px;
-          width: 90px;
-          margin-bottom: -24px;
+          height: 58px;
+          width: 75px;
+          margin-bottom: -20px;
           z-index: 1;
           filter: drop-shadow(0 1px 2px rgba(184, 154, 154, 0.1));
         }
@@ -71,13 +71,13 @@ export function SoldOutBadge() {
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 18px 28px;
-          min-width: 130px;
-          height: 70px;
+          padding: 14px 22px;
+          min-width: 110px;
+          height: 58px;
           background: linear-gradient(135deg, rgba(252, 248, 245, 0.92) 0%, rgba(249, 244, 240, 0.88) 100%);
           backdrop-filter: blur(10px);
           border: 1.5px solid rgba(184, 154, 154, 0.35);
-          border-radius: 14px;
+          border-radius: 12px;
           transform: rotate(-9deg);
           box-shadow: 
             0 8px 32px rgba(0, 0, 0, 0.08),
@@ -98,9 +98,9 @@ export function SoldOutBadge() {
         .badge-text {
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
             sans-serif;
-          font-size: 14px;
+          font-size: 12px;
           font-weight: 560;
-          letter-spacing: 0.32em;
+          letter-spacing: 0.28em;
           color: #000000;
           text-transform: uppercase;
           line-height: 1;
@@ -123,41 +123,41 @@ export function SoldOutBadge() {
         /* Responsive sizing */
         @media (max-width: 640px) {
           .badge-signboard {
-            padding: 16px 24px;
-            min-width: 120px;
-            height: 65px;
-            border-radius: 12px;
+            padding: 12px 18px;
+            min-width: 100px;
+            height: 52px;
+            border-radius: 10px;
           }
 
           .badge-text {
-            font-size: 13px;
-            letter-spacing: 0.28em;
+            font-size: 11px;
+            letter-spacing: 0.24em;
           }
 
           .badge-hook {
-            height: 62px;
-            width: 80px;
-            margin-bottom: -22px;
+            height: 52px;
+            width: 68px;
+            margin-bottom: -18px;
           }
         }
 
         @media (max-width: 380px) {
           .badge-signboard {
-            padding: 14px 20px;
-            min-width: 110px;
-            height: 60px;
-            border-radius: 10px;
+            padding: 10px 16px;
+            min-width: 90px;
+            height: 48px;
+            border-radius: 8px;
           }
 
           .badge-text {
-            font-size: 12px;
-            letter-spacing: 0.25em;
+            font-size: 10px;
+            letter-spacing: 0.22em;
           }
 
           .badge-hook {
-            height: 54px;
-            width: 72px;
-            margin-bottom: -20px;
+            height: 46px;
+            width: 62px;
+            margin-bottom: -16px;
           }
         }
       `}</style>

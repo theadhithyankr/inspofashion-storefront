@@ -2,7 +2,6 @@
 
 import { useMemo, useEffect, useState, useRef } from 'react'
 import Image from 'next/image'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { getProductVariantColors, getProductVariantImages } from '@/lib/format'
 import { getColorCodeWithFallback, isLightColor } from '@/lib/color-validation'
 import { preloadVariantImages } from '@/lib/image-cache'
@@ -18,16 +17,16 @@ function getDisplayColor(product, color) {
 }
 
 export function ProductVariantGallery({ product, selectedColor, onColorChange }) {
-  // ✅ NEW: Preload variant images on mount
   const [preloadStatus, setPreloadStatus] = useState('idle')
-  const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  const [touchStart, setTouchStart] = useState(null)
-  const [touchEnd, setTouchEnd] = useState(null)
-  const galleryRef = useRef(null)
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [isTransitioning, setIsTransitioning] = useState(true)
+  const [touchStartX, setTouchStartX] = useState(0)
+  const containerRef = useRef(null)
+  const carouselRef = useRef(null)
+  const transitionTimeoutRef = useRef(null)
 
   useEffect(() => {
     if (!product?.variants?.length) return
-
     setPreloadStatus('loading')
     preloadVariantImages(product.variants)
       .then(() => setPreloadStatus('complete'))
@@ -46,98 +45,141 @@ export function ProductVariantGallery({ product, selectedColor, onColorChange })
   const mappedImages = activeColor ? getProductVariantImages(product, activeColor) : []
   const galleryImages = mappedImages.length > 0 ? mappedImages : product.images || []
 
-  // Reset image index when color changes
+  // Create infinite loop array: [last, ...all, first]
+  const infiniteImages = galleryImages.length > 1 
+    ? [galleryImages[galleryImages.length - 1], ...galleryImages, galleryImages[0]]
+    : galleryImages
+
+  // Reset when color changes
   useEffect(() => {
-    setCurrentImageIndex(0)
+    setCurrentIndex(1)
+    setIsTransitioning(false)
   }, [activeColor])
 
-  const handlePrevImage = () => {
-    setCurrentImageIndex((prev) => (prev === 0 ? galleryImages.length - 1 : prev - 1))
-  }
-
-  const handleNextImage = () => {
-    setCurrentImageIndex((prev) => (prev === galleryImages.length - 1 ? 0 : prev + 1))
-  }
-
-  // Touch swipe handlers
-  const handleTouchStart = (e) => setTouchStart(e.targetTouches[0].clientX)
-  const handleTouchEnd = (e) => setTouchEnd(e.changedTouches[0].clientX)
-
+  // Handle smooth transitions
   useEffect(() => {
-    if (!touchStart || !touchEnd) return
-    
-    const distance = touchStart - touchEnd
-    const isLeftSwipe = distance > 50
-    const isRightSwipe = distance < -50
+    if (!carouselRef.current) return
 
-    if (isLeftSwipe) handleNextImage()
-    if (isRightSwipe) handlePrevImage()
-  }, [touchStart, touchEnd])
+    if (isTransitioning) {
+      carouselRef.current.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+    } else {
+      carouselRef.current.style.transition = 'none'
+    }
+  }, [isTransitioning])
+
+  // Handle infinite loop wrapping
+  useEffect(() => {
+    if (!carouselRef.current || isTransitioning) return
+
+    if (currentIndex === 0 || currentIndex === infiniteImages.length - 1) {
+      if (transitionTimeoutRef.current) clearTimeout(transitionTimeoutRef.current)
+      
+      transitionTimeoutRef.current = setTimeout(() => {
+        setIsTransitioning(false)
+        setCurrentIndex(currentIndex === 0 ? galleryImages.length : 1)
+      }, 500)
+    }
+  }, [currentIndex, isTransitioning, galleryImages.length, infiniteImages.length])
+
+  const handleSwipe = (direction) => {
+    if (!isTransitioning) {
+      setIsTransitioning(true)
+      if (direction === 'next') {
+        setCurrentIndex(prev => prev + 1)
+      } else {
+        setCurrentIndex(prev => prev - 1)
+      }
+    }
+  }
+
+  const handleTouchStart = (e) => {
+    setTouchStartX(e.touches[0].clientX)
+  }
+
+  const handleTouchEnd = (e) => {
+    const touchEndX = e.changedTouches[0].clientX
+    const diff = touchStartX - touchEndX
+
+    if (Math.abs(diff) > 30) {
+      if (diff > 0) {
+        handleSwipe('next')
+      } else {
+        handleSwipe('prev')
+      }
+    }
+  }
 
   if (galleryImages.length === 0) {
     return (
-      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-lg bg-black/5" />
+      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-lg bg-black/5" />
     )
   }
 
+  const displayIndex = currentIndex === 0 ? galleryImages.length : currentIndex === infiniteImages.length - 1 ? 1 : currentIndex
+
   return (
     <div>
-      {/* Slideshow container */}
-      <div 
-        ref={galleryRef}
+      {/* Carousel */}
+      <div
+        ref={containerRef}
         className="relative w-full overflow-hidden rounded-lg bg-black/5 aspect-[3/4]"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        {/* Main image */}
-        <div className="relative w-full h-full">
-          <Image
-            src={galleryImages[currentImageIndex]}
-            alt={`${product.title} - ${activeColor || `image ${currentImageIndex + 1}`}`}
-            fill
-            priority
-            sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-cover transition-opacity duration-300"
-          />
+        {/* Carousel wrapper with infinite loop */}
+        <div
+          ref={carouselRef}
+          className="flex h-full"
+          style={{
+            transform: `translateX(-${currentIndex * 100}%)`,
+            WebkitBackfaceVisibility: 'hidden',
+            backfaceVisibility: 'hidden',
+          }}
+        >
+          {infiniteImages.map((image, idx) => (
+            <div
+              key={idx}
+              className="relative w-full h-full flex-shrink-0"
+            >
+              <Image
+                src={image}
+                alt={`Product image ${idx}`}
+                fill
+                priority={idx <= 2}
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover"
+                draggable="false"
+              />
+            </div>
+          ))}
         </div>
 
-        {/* Navigation buttons - Only show if multiple images */}
+        {/* Counter */}
         {galleryImages.length > 1 && (
-          <>
-            <button
-              onClick={handlePrevImage}
-              className="absolute left-3 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/60 text-white p-2 rounded-full transition-colors duration-300"
-              aria-label="Previous image"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-            <button
-              onClick={handleNextImage}
-              className="absolute right-3 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/60 text-white p-2 rounded-full transition-colors duration-300"
-              aria-label="Next image"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </button>
+          <div className="absolute bottom-4 left-4 z-20 bg-black/50 text-white px-3 py-1.5 rounded text-sm font-medium">
+            {displayIndex}/{galleryImages.length}
+          </div>
+        )}
 
-            {/* Image counter */}
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 bg-black/50 text-white px-3 py-1 rounded-full text-xs font-semibold">
-              {currentImageIndex + 1} / {galleryImages.length}
-            </div>
-
-            {/* Dot indicators */}
-            <div className="absolute bottom-14 left-1/2 -translate-x-1/2 z-20 flex gap-1.5">
-              {galleryImages.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentImageIndex(index)}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
-                    index === currentImageIndex ? 'bg-white w-6' : 'bg-white/50 w-1.5'
-                  }`}
-                  aria-label={`Go to image ${index + 1}`}
-                />
-              ))}
-            </div>
-          </>
+        {/* Dots */}
+        {galleryImages.length > 1 && (
+          <div className="absolute bottom-4 right-4 z-20 flex gap-2">
+            {galleryImages.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => {
+                  setIsTransitioning(true)
+                  setCurrentIndex(idx + 1)
+                }}
+                className={`transition-all duration-300 rounded-full ${
+                  idx === displayIndex - 1
+                    ? 'w-8 h-2 bg-white'
+                    : 'w-2 h-2 bg-white/50 hover:bg-white/70'
+                }`}
+                aria-label={`Go to slide ${idx + 1}`}
+              />
+            ))}
+          </div>
         )}
       </div>
 
@@ -164,16 +206,12 @@ export function ProductVariantGallery({ product, selectedColor, onColorChange })
             {colors.map((color) => {
               const normalizedColor = normalizeColorForCompare(color)
               const isActive = normalizedColor === normalizeColorForCompare(activeColor)
-
-              // ✅ NEW: Get color code from variant map
               const variant = variantMap[normalizedColor]
+              
               let hex = null
-
               if (variant) {
-                // ✅ Use backend color_code with fallback
                 hex = getColorCodeWithFallback(variant, variant.images)
               } else {
-                // Fallback if no variant data
                 hex = getColorCodeWithFallback({ color }, mappedImages)
               }
 
