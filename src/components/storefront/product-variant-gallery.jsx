@@ -19,10 +19,14 @@ function getDisplayColor(product, color) {
 export function ProductVariantGallery({ product, selectedColor, onColorChange }) {
   const [preloadStatus, setPreloadStatus] = useState('idle')
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [isTransitioning, setIsTransitioning] = useState(true)
-  const [touchStartX, setTouchStartX] = useState(0)
+  const [isTransitioning, setIsTransitioning] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragX, setDragX] = useState(0)
+  
   const containerRef = useRef(null)
   const carouselRef = useRef(null)
+  const touchStartXRef = useRef(0)
+  const touchStartTimeRef = useRef(0)
   const transitionTimeoutRef = useRef(null)
 
   useEffect(() => {
@@ -45,7 +49,7 @@ export function ProductVariantGallery({ product, selectedColor, onColorChange })
   const mappedImages = activeColor ? getProductVariantImages(product, activeColor) : []
   const galleryImages = mappedImages.length > 0 ? mappedImages : product.images || []
 
-  // Create infinite loop array: [last, ...all, first]
+  // Create infinite loop array
   const infiniteImages = galleryImages.length > 1 
     ? [galleryImages[galleryImages.length - 1], ...galleryImages, galleryImages[0]]
     : galleryImages
@@ -54,22 +58,29 @@ export function ProductVariantGallery({ product, selectedColor, onColorChange })
   useEffect(() => {
     setCurrentIndex(1)
     setIsTransitioning(false)
+    setDragX(0)
+    setIsDragging(false)
   }, [activeColor])
 
-  // Handle smooth transitions
+  // Update carousel transform
   useEffect(() => {
     if (!carouselRef.current) return
+
+    const offset = isDragging ? dragX : 0
+    const translateValue = -currentIndex * 100 + (offset / (containerRef.current?.offsetWidth || 1)) * 100
+    
+    carouselRef.current.style.transform = `translateX(calc(${translateValue}% + 0px))`
 
     if (isTransitioning) {
       carouselRef.current.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
     } else {
       carouselRef.current.style.transition = 'none'
     }
-  }, [isTransitioning])
+  }, [currentIndex, isDragging, dragX, isTransitioning])
 
   // Handle infinite loop wrapping
   useEffect(() => {
-    if (!carouselRef.current || isTransitioning) return
+    if (!carouselRef.current || isTransitioning || isDragging) return
 
     if (currentIndex === 0 || currentIndex === infiniteImages.length - 1) {
       if (transitionTimeoutRef.current) clearTimeout(transitionTimeoutRef.current)
@@ -79,34 +90,45 @@ export function ProductVariantGallery({ product, selectedColor, onColorChange })
         setCurrentIndex(currentIndex === 0 ? galleryImages.length : 1)
       }, 500)
     }
-  }, [currentIndex, isTransitioning, galleryImages.length, infiniteImages.length])
-
-  const handleSwipe = (direction) => {
-    if (!isTransitioning) {
-      setIsTransitioning(true)
-      if (direction === 'next') {
-        setCurrentIndex(prev => prev + 1)
-      } else {
-        setCurrentIndex(prev => prev - 1)
-      }
-    }
-  }
+  }, [currentIndex, isTransitioning, isDragging, galleryImages.length, infiniteImages.length])
 
   const handleTouchStart = (e) => {
-    setTouchStartX(e.touches[0].clientX)
+    if (isTransitioning) return
+    touchStartXRef.current = e.touches[0].clientX
+    touchStartTimeRef.current = Date.now()
+    setIsDragging(true)
+    setDragX(0)
+  }
+
+  const handleTouchMove = (e) => {
+    if (!isDragging) return
+    const currentX = e.touches[0].clientX
+    const diff = currentX - touchStartXRef.current
+    setDragX(diff)
   }
 
   const handleTouchEnd = (e) => {
-    const touchEndX = e.changedTouches[0].clientX
-    const diff = touchStartX - touchEndX
+    if (!isDragging) return
+    
+    const elapsedTime = Date.now() - touchStartTimeRef.current
+    const distance = dragX
+    const velocity = Math.abs(distance) / elapsedTime
 
-    if (Math.abs(diff) > 30) {
-      if (diff > 0) {
-        handleSwipe('next')
+    setIsDragging(false)
+
+    // Minimum swipe distance is 20px OR minimum velocity
+    if (Math.abs(distance) > 20 || velocity > 0.3) {
+      setIsTransitioning(true)
+      if (distance > 0) {
+        // Swiped right - go to previous
+        setCurrentIndex(prev => prev - 1)
       } else {
-        handleSwipe('prev')
+        // Swiped left - go to next
+        setCurrentIndex(prev => prev + 1)
       }
     }
+    
+    setDragX(0)
   }
 
   if (galleryImages.length === 0) {
@@ -122,8 +144,9 @@ export function ProductVariantGallery({ product, selectedColor, onColorChange })
       {/* Carousel */}
       <div
         ref={containerRef}
-        className="relative w-full overflow-hidden rounded-lg bg-black/5 aspect-[3/4]"
+        className="relative w-full overflow-hidden rounded-lg bg-black/5 aspect-[3/4] cursor-grab active:cursor-grabbing select-none"
         onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
         {/* Carousel wrapper with infinite loop */}
@@ -131,9 +154,10 @@ export function ProductVariantGallery({ product, selectedColor, onColorChange })
           ref={carouselRef}
           className="flex h-full"
           style={{
-            transform: `translateX(-${currentIndex * 100}%)`,
             WebkitBackfaceVisibility: 'hidden',
             backfaceVisibility: 'hidden',
+            WebkitPerspective: '1000px',
+            perspective: '1000px',
           }}
         >
           {infiniteImages.map((image, idx) => (
@@ -147,7 +171,7 @@ export function ProductVariantGallery({ product, selectedColor, onColorChange })
                 fill
                 priority={idx <= 2}
                 sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-cover"
+                className="object-cover pointer-events-none"
                 draggable="false"
               />
             </div>
@@ -156,7 +180,7 @@ export function ProductVariantGallery({ product, selectedColor, onColorChange })
 
         {/* Counter */}
         {galleryImages.length > 1 && (
-          <div className="absolute bottom-4 left-4 z-20 bg-black/50 text-white px-3 py-1.5 rounded text-sm font-medium">
+          <div className="absolute bottom-4 left-4 z-20 bg-black/50 text-white px-3 py-1.5 rounded text-sm font-medium pointer-events-none">
             {displayIndex}/{galleryImages.length}
           </div>
         )}
@@ -168,8 +192,10 @@ export function ProductVariantGallery({ product, selectedColor, onColorChange })
               <button
                 key={idx}
                 onClick={() => {
-                  setIsTransitioning(true)
-                  setCurrentIndex(idx + 1)
+                  if (!isTransitioning && !isDragging) {
+                    setIsTransitioning(true)
+                    setCurrentIndex(idx + 1)
+                  }
                 }}
                 className={`transition-all duration-300 rounded-full ${
                   idx === displayIndex - 1
