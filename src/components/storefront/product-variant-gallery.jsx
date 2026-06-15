@@ -19,15 +19,12 @@ function getDisplayColor(product, color) {
 export function ProductVariantGallery({ product, selectedColor, onColorChange }) {
   const [preloadStatus, setPreloadStatus] = useState('idle')
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [isTransitioning, setIsTransitioning] = useState(false)
-  const [isDragging, setIsDragging] = useState(false)
-  const [dragX, setDragX] = useState(0)
+  const [isAnimating, setIsAnimating] = useState(false)
   
   const containerRef = useRef(null)
-  const carouselRef = useRef(null)
-  const touchStartXRef = useRef(0)
-  const touchStartTimeRef = useRef(0)
-  const transitionTimeoutRef = useRef(null)
+  const sliderRef = useRef(null)
+  const touchStartRef = useRef(0)
+  const touchEndRef = useRef(0)
 
   useEffect(() => {
     if (!product?.variants?.length) return
@@ -49,129 +46,84 @@ export function ProductVariantGallery({ product, selectedColor, onColorChange })
   const mappedImages = activeColor ? getProductVariantImages(product, activeColor) : []
   const galleryImages = mappedImages.length > 0 ? mappedImages : product.images || []
 
-  // Create infinite loop array
-  const infiniteImages = galleryImages.length > 1 
-    ? [galleryImages[galleryImages.length - 1], ...galleryImages, galleryImages[0]]
-    : galleryImages
-
   // Reset when color changes
   useEffect(() => {
-    setCurrentIndex(1)
-    setIsTransitioning(false)
-    setDragX(0)
-    setIsDragging(false)
+    setCurrentIndex(0)
+    setIsAnimating(false)
   }, [activeColor])
 
-  // Update carousel transform
-  useEffect(() => {
-    if (!carouselRef.current) return
-
-    const offset = isDragging ? dragX : 0
-    const translateValue = -currentIndex * 100 + (offset / (containerRef.current?.offsetWidth || 1)) * 100
-    
-    carouselRef.current.style.transform = `translateX(calc(${translateValue}% + 0px))`
-
-    if (isTransitioning) {
-      carouselRef.current.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
-    } else {
-      carouselRef.current.style.transition = 'none'
-    }
-  }, [currentIndex, isDragging, dragX, isTransitioning])
-
-  // Handle infinite loop wrapping
-  useEffect(() => {
-    if (!carouselRef.current || isTransitioning || isDragging) return
-
-    if (currentIndex === 0 || currentIndex === infiniteImages.length - 1) {
-      if (transitionTimeoutRef.current) clearTimeout(transitionTimeoutRef.current)
-      
-      transitionTimeoutRef.current = setTimeout(() => {
-        setIsTransitioning(false)
-        setCurrentIndex(currentIndex === 0 ? galleryImages.length : 1)
-      }, 500)
-    }
-  }, [currentIndex, isTransitioning, isDragging, galleryImages.length, infiniteImages.length])
-
+  // Handle touch start
   const handleTouchStart = (e) => {
-    if (isTransitioning) return
-    touchStartXRef.current = e.touches[0].clientX
-    touchStartTimeRef.current = Date.now()
-    setIsDragging(true)
-    setDragX(0)
+    touchStartRef.current = e.changedTouches[0].screenX
+    touchEndRef.current = e.changedTouches[0].screenX
   }
 
+  // Handle touch move
   const handleTouchMove = (e) => {
-    if (!isDragging) return
-    const currentX = e.touches[0].clientX
-    const diff = currentX - touchStartXRef.current
-    setDragX(diff)
+    touchEndRef.current = e.changedTouches[0].screenX
   }
 
-  const handleTouchEnd = (e) => {
-    if (!isDragging) return
-    
-    const elapsedTime = Date.now() - touchStartTimeRef.current
-    const distance = dragX
-    const velocity = Math.abs(distance) / elapsedTime
+  // Handle touch end - simple and reliable
+  const handleTouchEnd = () => {
+    if (isAnimating) return
+    if (galleryImages.length <= 1) return
 
-    setIsDragging(false)
+    const swipeThreshold = 50
+    const diff = touchStartRef.current - touchEndRef.current
 
-    // Minimum swipe distance is 20px OR minimum velocity
-    if (Math.abs(distance) > 20 || velocity > 0.3) {
-      setIsTransitioning(true)
-      if (distance > 0) {
-        // Swiped right - go to previous
-        setCurrentIndex(prev => prev - 1)
+    if (Math.abs(diff) > swipeThreshold) {
+      setIsAnimating(true)
+      if (diff > 0) {
+        // Swiped left - next image
+        setCurrentIndex((prev) => (prev + 1) % galleryImages.length)
       } else {
-        // Swiped left - go to next
-        setCurrentIndex(prev => prev + 1)
+        // Swiped right - prev image
+        setCurrentIndex((prev) => (prev - 1 + galleryImages.length) % galleryImages.length)
       }
+      setTimeout(() => setIsAnimating(false), 500)
     }
-    
-    setDragX(0)
+
+    touchStartRef.current = 0
+    touchEndRef.current = 0
   }
 
   if (galleryImages.length === 0) {
     return (
-      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-lg bg-black/5" />
+      <div className="w-full bg-white rounded-lg" style={{ aspectRatio: '3 / 4' }} />
     )
   }
 
-  const displayIndex = currentIndex === 0 ? galleryImages.length : currentIndex === infiniteImages.length - 1 ? 1 : currentIndex
-
   return (
-    <div>
-      {/* Carousel */}
+    <div className="w-full">
+      {/* Gallery Container */}
       <div
         ref={containerRef}
-        className="relative w-full overflow-hidden rounded-lg bg-black/5 aspect-[3/4] cursor-grab active:cursor-grabbing select-none"
+        className="relative w-full overflow-hidden rounded-lg bg-white cursor-grab active:cursor-grabbing select-none"
+        style={{ aspectRatio: '3 / 4' }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        {/* Carousel wrapper with infinite loop */}
+        {/* Slider */}
         <div
-          ref={carouselRef}
-          className="flex h-full"
+          ref={sliderRef}
+          className="flex h-full w-full transition-transform duration-500 ease-out"
           style={{
-            WebkitBackfaceVisibility: 'hidden',
-            backfaceVisibility: 'hidden',
-            WebkitPerspective: '1000px',
-            perspective: '1000px',
+            transform: `translateX(-${currentIndex * 100}%)`,
           }}
         >
-          {infiniteImages.map((image, idx) => (
+          {galleryImages.map((image, idx) => (
             <div
-              key={idx}
-              className="relative w-full h-full flex-shrink-0"
+              key={`${activeColor}-${idx}`}
+              className="relative w-full h-full flex-shrink-0 flex items-center justify-center bg-white"
             >
               <Image
                 src={image}
-                alt={`Product image ${idx}`}
+                alt={`${product.title} - image ${idx + 1}`}
                 fill
-                priority={idx <= 2}
-                sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-cover pointer-events-none"
+                priority={idx === 0}
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 60vw"
+                className="object-cover"
                 draggable="false"
               />
             </div>
@@ -180,36 +132,37 @@ export function ProductVariantGallery({ product, selectedColor, onColorChange })
 
         {/* Counter */}
         {galleryImages.length > 1 && (
-          <div className="absolute bottom-4 left-4 z-20 bg-black/50 text-white px-3 py-1.5 rounded text-sm font-medium pointer-events-none">
-            {displayIndex}/{galleryImages.length}
+          <div className="absolute bottom-4 left-4 z-20 bg-black/50 backdrop-blur-sm text-white px-3 py-1.5 rounded text-xs sm:text-sm font-medium">
+            {currentIndex + 1}/{galleryImages.length}
           </div>
         )}
 
         {/* Dots */}
         {galleryImages.length > 1 && (
-          <div className="absolute bottom-4 right-4 z-20 flex gap-2">
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2 px-3 py-2 bg-black/30 backdrop-blur-sm rounded-full">
             {galleryImages.map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => {
-                  if (!isTransitioning && !isDragging) {
-                    setIsTransitioning(true)
-                    setCurrentIndex(idx + 1)
+                  if (!isAnimating) {
+                    setIsAnimating(true)
+                    setCurrentIndex(idx)
+                    setTimeout(() => setIsAnimating(false), 500)
                   }
                 }}
-                className={`transition-all duration-300 rounded-full ${
-                  idx === displayIndex - 1
-                    ? 'w-8 h-2 bg-white'
-                    : 'w-2 h-2 bg-white/50 hover:bg-white/70'
+                className={`transition-all duration-300 rounded-full h-2 ${
+                  idx === currentIndex
+                    ? 'w-8 bg-white'
+                    : 'w-2 bg-white/60 hover:bg-white/80'
                 }`}
-                aria-label={`Go to slide ${idx + 1}`}
+                aria-label={`Go to image ${idx + 1}`}
               />
             ))}
           </div>
         )}
       </div>
 
-      {/* Color selection */}
+      {/* Color Selection */}
       {colors.length > 0 && (
         <div className="mt-6 rounded-lg border border-black/10 bg-white p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -220,7 +173,7 @@ export function ProductVariantGallery({ product, selectedColor, onColorChange })
               </p>
             </div>
             {mappedImages.length > 0 && (
-              <p className="text-xs text-black/60">{mappedImages.length} image{mappedImages.length > 1 ? 's' : ''} for this colour</p>
+              <p className="text-xs text-black/60">{mappedImages.length} image{mappedImages.length > 1 ? 's' : ''}</p>
             )}
           </div>
 
