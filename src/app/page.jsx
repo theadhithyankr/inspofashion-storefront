@@ -155,7 +155,7 @@ export default async function HomePage() {
       {/* New Arrivals & Best Sellers Section */}
       <section className="bg-white py-12 sm:py-24 lg:py-32">
         <div className="mx-auto max-w-full px-6 sm:px-8 lg:px-16">
-          <div className="grid gap-4 sm:gap-8 grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 auto-rows-[200px] sm:auto-rows-[400px] lg:auto-rows-[450px]">
+          <div className="grid gap-4 sm:gap-8 grid-cols-1 sm:grid-cols-1 lg:grid-cols-1 auto-rows-[300px] sm:auto-rows-[600px] lg:auto-rows-[700px]">
             {/* New Arrivals */}
             <Link
               href="/search?sort=newest"
