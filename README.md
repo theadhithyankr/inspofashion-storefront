@@ -14,7 +14,7 @@ Customer-facing fashion storefront for browsing collections and handing off chec
 
 InspoFashion Storefront is a fashion commerce project in the TheAdhithyanKR/inspofashion-storefront repository. React and Vite storefront for browsing Inspo Fashion collections, search, and product pages.
 
-The README was written from the repository contents, including its manifest files, source tree, and available project metadata. The primary manifest is $(@{Path=package.json; Json=}.Path), and the commands below are taken from its scripts.
+The README was written from the repository contents, including its manifest files, source tree, and available project metadata. The primary manifest is `package.json`, and the commands below are taken from its scripts.
 
 ## Key Features
 
