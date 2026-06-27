@@ -1,39 +1,81 @@
-# Inspofashions Storefront
+<div align="center">
 
-Next.js storefront for a premium clothing brand with Supabase catalog data and WhatsApp-only checkout.
+# InspoFashion Storefront
 
-## Features
-- Editorial mobile-first home page
-- SEO-friendly collection and product routes
-- Product image galleries, size/color selection, and cart persistence
-- WhatsApp checkout with validated customer details
-- No payment collection and no stored customer/order PII
-- Sitemap, robots, metadata, security headers, and Vercel-ready config
+Customer-facing fashion storefront for browsing collections and handing off checkout to WhatsApp.
+
+![Next.js](https://img.shields.io/badge/Next.js-black?logo=nextdotjs) ![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white) ![React](https://img.shields.io/badge/React-20232A?logo=react) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?logo=tailwindcss&logoColor=white) ![Supabase](https://img.shields.io/badge/Supabase-3FCF8E?logo=supabase&logoColor=white)
+
+[Repository](https://github.com/theadhithyankr/inspofashion-storefront)
+
+</div>
+
+## Overview
+
+InspoFashion Storefront is a fashion commerce project in the TheAdhithyanKR/inspofashion-storefront repository. React and Vite storefront for browsing Inspo Fashion collections, search, and product pages.
+
+The README was written from the repository contents, including its manifest files, source tree, and available project metadata. The primary manifest is $(System.Collections.Hashtable.Path), and the commands below are taken from its scripts.
+
+## Key Features
+
+- Mobile-first collection and product browsing
+- Product detail pages with customer purchase intent flow
+- Cart-oriented shopping experience without forcing payment processing
+- Production-ready storefront structure for deployment
 
 ## Tech Stack
-- Next.js App Router
+
+- Next.js
+- Vite
 - React
 - Tailwind CSS
 - Supabase
-- lucide-react
 
-## Local Development
-```bash
+## Project Structure
+
+`	ext
+.
+|-- .env.example
+|-- .nexdrale/memory.md
+|-- ANALYSIS_COMPLETE.md
+|-- ANALYSIS_REPORT.md
+|-- ARCHITECTURE_DIAGRAM.md
+|-- BEFORE_AFTER.md
+|-- CHANGES_SUMMARY.md
+|-- CODE_EXAMPLES.md
+|-- DEPLOYMENT_GUIDE.md
+|-- DEPLOYMENT_READY.md
+|-- DESIGN_SPECIFICATIONS.md
+|-- DOCUMENTATION_INDEX.md
+|-- eslint.config.js
+|-- EXECUTIVE_SUMMARY.md
+|-- FINAL_DESIGN_IMPLEMENTED.md
+|-- FINAL_HERO_SUMMARY.md
+|-- HERO_IMPLEMENTATION_SUMMARY.md
+|-- HERO_QUICK_REFERENCE.md
+|-- HERO_REDESIGN_FINAL.md
+|-- IMPLEMENTATION_CHECKLIST.md
+|-- IMPLEMENTATION_COMPLETE.md
+|-- index.html
+|-- jsconfig.json
+|-- LIFESTYLE_REDESIGN.md
+`
+
+## Setup
+
+`ash
 npm install
-cp .env.example .env.local
 npm run dev
-```
+`
 
-Open `http://localhost:3000`.
+## What This Project Demonstrates
 
-## Production Build
-```bash
-npm run lint
-npm run build
-```
+- Ability to turn a focused product idea into a working codebase
+- Practical use of the repository's chosen framework and tooling
+- Attention to deployable structure, repeatable setup, and portfolio-ready presentation
+- Project-specific implementation around fashion commerce
 
-## Vercel
-- Root directory: `storefront`
-- Framework preset: Next.js
-- Build command: `npm run build`
-- Environment variables: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `NEXT_PUBLIC_SITE_URL`
+## Links
+
+- Repository: [https://github.com/theadhithyankr/inspofashion-storefront](https://github.com/theadhithyankr/inspofashion-storefront)
+- Live demo: [https://storefrontinspofashion.vercel.app](https://storefrontinspofashion.vercel.app)
