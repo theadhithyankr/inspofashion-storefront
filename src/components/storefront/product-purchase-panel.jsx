@@ -84,34 +84,34 @@ export function ProductPurchasePanel({ product, selectedColor }) {
           <p className="text-xs sm:text-sm font-semibold text-orange-900">{color} is currently out of stock, but other colours are available.</p>
         </div>
       )}
-      <p className="text-xs font-bold uppercase tracking-[0.2em] text-black/60">{product.category}</p>
-      <h1 className="mt-2 font-display text-2xl sm:text-3xl lg:text-4xl leading-tight text-black lg:mt-3">{product.title}</h1>
+      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-text-secondary">{product.category}</p>
+      <h1 className="mt-2 font-display text-2xl sm:text-3xl lg:text-4xl leading-tight text-text-primary lg:mt-3">{product.title}</h1>
       <div className="mt-2 sm:mt-3 flex items-baseline gap-3">
-        <p className="text-lg sm:text-xl font-semibold text-black">{formatPrice(product.price)}</p>
+        <p className="text-lg sm:text-xl font-semibold text-rose-400">{formatPrice(product.price)}</p>
         {product.compare_at_price && Number(product.compare_at_price) > Number(product.price) && (
-          <p className="text-sm sm:text-base text-black/40 line-through">{formatPrice(product.compare_at_price)}</p>
+          <p className="text-sm sm:text-base text-text-light line-through">{formatPrice(product.compare_at_price)}</p>
         )}
       </div>
-      {product.description && <p className="mt-3 sm:mt-4 text-xs sm:text-sm leading-6 text-black/70">{product.description}</p>}
+      {product.description && <p className="mt-3 sm:mt-4 text-xs sm:text-sm leading-6 text-text-secondary">{product.description}</p>}
 
       <div className="mt-5 sm:mt-6">
         {color && (
-          <div className="mb-4 rounded-lg border border-black/10 bg-black/2 px-3 py-2.5">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-black/60">Selected colour</p>
-            <p className="mt-1 text-xs sm:text-sm font-semibold text-black">{color}</p>
+          <div className="mb-4 rounded-lg border border-border-subtle bg-cream-50 px-3 py-2.5">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-text-secondary">Selected colour</p>
+            <p className="mt-1 text-xs sm:text-sm font-medium text-text-primary">{color}</p>
             {variant?.sku && (
-              <p className="mt-1.5 text-xs text-black/60">SKU: {variant.sku}</p>
+              <p className="mt-1.5 text-xs text-text-light">SKU: {variant.sku}</p>
             )}
             {variant && (
-              <p className={`mt-1 text-xs font-medium ${variant.stock > 0 ? 'text-green-600' : 'text-orange-600'}`}>
+              <p className={`mt-1 text-xs font-medium ${variant.stock > 0 ? 'text-rose-400' : 'text-rose-300'}`}>
                 {variant.stock > 0 ? `${variant.stock} in stock` : 'Out of stock'}
               </p>
             )}
           </div>
         )}
         <div className="mb-2.5 flex items-center justify-between">
-          <span className="text-xs font-bold uppercase tracking-[0.2em] text-black/60">Size</span>
-          <a href="/size-guide" className="text-xs text-black/70 underline hover:text-black">Size guide</a>
+          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-text-secondary">Size</span>
+          <a href="/size-guide" className="text-xs text-text-secondary underline hover:text-rose-400 transition-colors">Size guide</a>
         </div>
         <div className="grid grid-cols-4 sm:grid-cols-5 gap-1.5 sm:gap-2">
           {availableSizes.map((option) => (
@@ -121,7 +121,7 @@ export function ProductPurchasePanel({ product, selectedColor }) {
                 setSize(option)
                 setError('')
               }}
-              className={`border px-2 sm:px-3 py-2 text-xs sm:text-sm font-semibold transition ${size === option ? 'border-black bg-black text-white' : 'border-black/15 bg-white text-black hover:border-black'}`}
+              className={`border rounded-md px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium transition-all duration-200 ${size === option ? 'border-rose-400 bg-rose-50 text-rose-400' : 'border-border-light bg-cream-50 text-text-primary hover:border-rose-250 hover:bg-rose-50'}`}
             >
               {option}
             </button>
@@ -134,47 +134,47 @@ export function ProductPurchasePanel({ product, selectedColor }) {
         )}
       </div>
       <div className="mt-4 sm:mt-5">
-        <span className="mb-2 block text-xs font-bold uppercase tracking-[0.2em] text-black/60">Quantity</span>
-        <div className="flex w-fit items-center border border-black/15">
+        <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-text-secondary">Quantity</span>
+        <div className="flex w-fit items-center border border-border-light rounded-md overflow-hidden">
           <button 
-            className="px-2 sm:px-3 py-1.5 transition hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-50" 
+            className="px-2 sm:px-3 py-1.5 transition-colors hover:bg-cream-200 disabled:cursor-not-allowed disabled:opacity-50" 
             onClick={() => setQuantity(Math.max(1, quantity - 1))} 
             aria-label="Decrease quantity"
             disabled={product.is_sold_out}
           >
-            <Minus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            <Minus className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-text-primary" />
           </button>
-          <span className="w-8 sm:w-10 text-center text-xs sm:text-sm font-semibold">{quantity}</span>
+          <span className="w-8 sm:w-10 text-center text-xs sm:text-sm font-medium text-text-primary border-l border-r border-border-light">{quantity}</span>
           <button 
-            className="px-2 sm:px-3 py-1.5 transition hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-50" 
+            className="px-2 sm:px-3 py-1.5 transition-colors hover:bg-cream-200 disabled:cursor-not-allowed disabled:opacity-50" 
             onClick={() => setQuantity(quantity + 1)} 
             aria-label="Increase quantity"
             disabled={product.is_sold_out}
           >
-            <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-text-primary" />
           </button>
         </div>
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-black/10 bg-white/95 px-4 py-2.5 shadow-[0_-12px_40px_rgba(0,0,0,0.08)] backdrop-blur sm:px-6 sm:py-3 lg:static lg:mt-6 lg:border-0 lg:bg-transparent lg:px-0 lg:py-0 lg:shadow-none">
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border-light bg-white/98 px-4 py-2.5 shadow-md backdrop-blur-sm sm:px-6 sm:py-3 lg:static lg:mt-6 lg:border-0 lg:bg-transparent lg:px-0 lg:py-0 lg:shadow-none">
         {product.is_sold_out || !variant || variant.stock === 0 ? (
           <button
             disabled
-            className="flex w-full items-center justify-center gap-2 px-4 py-2.5 sm:px-6 sm:py-3 font-bold text-xs sm:text-sm uppercase tracking-[0.16em] text-white bg-black/30 cursor-not-allowed"
+            className="flex w-full items-center justify-center gap-2 px-4 py-2.5 sm:px-6 sm:py-3 font-semibold text-xs sm:text-sm uppercase tracking-[0.16em] text-white bg-text-light/60 cursor-not-allowed rounded-md"
           >
             {!variant ? 'Color Not Available' : 'Out of Stock'}
           </button>
         ) : (
           <button
             onClick={add}
-            className={`flex w-full items-center justify-center gap-2 px-4 py-2.5 sm:px-6 sm:py-3 font-bold text-xs sm:text-sm uppercase tracking-[0.16em] text-white transition duration-300 ${added ? 'bg-green-700' : 'bg-black hover:bg-black/90'}`}
+            className={`flex w-full items-center justify-center gap-2 px-4 py-2.5 sm:px-6 sm:py-3 font-semibold text-xs sm:text-sm uppercase tracking-[0.16em] text-white transition-all duration-200 rounded-md ${added ? 'bg-text-light/70' : 'bg-rose-400 hover:bg-rose-300 active:bg-rose-500'}`}
             aria-live="polite"
           >
             <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5" />
-            {added ? 'Added to bag' : `Add to bag - ${formatPrice(Number(product.price) * quantity)}`}
+            {added ? 'Added to bag' : `Add to bag — ${formatPrice(Number(product.price) * quantity)}`}
           </button>
         )}
-        {added && <p className="mt-1.5 text-center text-xs font-semibold uppercase tracking-[0.16em] text-green-700">Opening your bag...</p>}
+        {added && <p className="mt-1.5 text-center text-xs font-semibold uppercase tracking-[0.16em] text-rose-400">Opening your bag...</p>}
       </div>
 
       <div className="mt-6 sm:mt-8 divide-y divide-black/10 border-y border-black/10 text-xs sm:text-sm">
@@ -189,8 +189,8 @@ export function ProductPurchasePanel({ product, selectedColor }) {
 function InfoRow({ label, value }) {
   return (
     <div className="py-3 sm:py-4">
-      <p className="text-xs font-bold uppercase tracking-[0.2em] text-black/60">{label}</p>
-      <p className="mt-1.5 leading-5 sm:leading-6 text-black/70 text-xs sm:text-sm">{value}</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-text-secondary">{label}</p>
+      <p className="mt-1.5 leading-5 sm:leading-6 text-text-secondary text-xs sm:text-sm">{value}</p>
     </div>
   )
 }

@@ -3,9 +3,9 @@ import { ProductCard } from './product-card'
 export function ProductGrid({ products, priorityCount = 0 }) {
   if (!products.length) {
     return (
-      <div className="border border-gray-200 px-8 py-24 text-center bg-gray-50">
-        <p className="font-display text-2xl text-black">No products found</p>
-        <p className="mt-3 text-sm text-black/60">Try another collection or search term.</p>
+      <div className="border border-border-light rounded-lg px-8 py-24 text-center bg-cream-50">
+        <p className="font-display text-2xl text-text-primary font-normal">No products found</p>
+        <p className="mt-3 text-sm text-text-secondary">Try another collection or search term.</p>
       </div>
     )
   }

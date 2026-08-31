@@ -7,7 +7,34 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Luxury monochrome palette
+        // Premium nightwear palette - warm creams and soft rose
+        cream: {
+          50: '#fffef9',
+          100: '#fefbf3',
+          150: '#fdf8f1',
+          200: '#fdf5ed',
+          300: '#fce8e0',
+        },
+        rose: {
+          50: '#fdf6f5',
+          100: '#f9eceb',
+          150: '#f5dcd9',
+          200: '#f0ccc8',
+          250: '#edbfb6',
+          300: '#e8b5ad',
+          400: '#d99a8f',
+        },
+        text: {
+          primary: '#3d2f2c',
+          secondary: '#6b5552',
+          light: '#8b7a75',
+          muted: '#b8aca8',
+        },
+        border: {
+          light: '#ede7e3',
+          subtle: '#f5eeea',
+        },
+        // Legacy palette for backward compatibility
         brand: {
           50: '#fafaf9',
           100: '#f5f5f4',
@@ -20,7 +47,6 @@ export default {
           800: '#292524',
           900: '#1c1917',
         },
-        // Accent colors - earthy greens
         accent: {
           50: '#f0fdf4',
           100: '#dcfce7',
@@ -33,7 +59,6 @@ export default {
           800: '#166534',
           900: '#14532d',
         },
-        // Warm neutrals
         warm: {
           50: '#fdf8f6',
           100: '#f9f1ed',
@@ -56,6 +81,18 @@ export default {
         '88': '22rem',
         '112': '28rem',
         '128': '32rem',
+      },
+      borderRadius: {
+        'sm': '3px',
+        'md': '6px',
+        'lg': '8px',
+      },
+      boxShadow: {
+        'xs': '0 1px 2px rgba(0, 0, 0, 0.05)',
+        'sm': '0 2px 4px rgba(0, 0, 0, 0.08)',
+        'md': '0 4px 8px rgba(0, 0, 0, 0.1)',
+        'soft': '0 2px 6px rgba(0, 0, 0, 0.06)',
+        'none': 'none',
       },
       animation: {
         'slideInMenu': 'slideInMenu 260ms ease-out',

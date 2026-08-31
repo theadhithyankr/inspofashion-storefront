@@ -14,7 +14,7 @@ export function ProductCard({ product, priority = false }) {
   return (
     <Link href={`/products/${product.slug}`} className="group block">
       <div 
-        className="relative aspect-[3/4] overflow-hidden bg-gray-100 mb-4"
+        className="relative aspect-[3/4] overflow-hidden bg-cream-100 mb-4 rounded-lg"
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
       >
@@ -53,7 +53,7 @@ export function ProductCard({ product, priority = false }) {
 
         {/* Featured label */}
         {product.is_featured && (
-          <span className="absolute left-4 top-4 bg-black text-white px-3 py-1 text-[9px] font-bold uppercase tracking-[0.15em] z-10">
+          <span className="absolute left-4 top-4 bg-rose-400 text-white px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] z-10 rounded-md">
             Featured
           </span>
         )}
@@ -63,29 +63,29 @@ export function ProductCard({ product, priority = false }) {
       </div>
 
       {/* Product info */}
-      <div className="space-y-2">
-        {/* Product name */}
-        <h3 className={`font-display text-base sm:text-lg leading-tight font-normal ${
-          product.is_sold_out ? 'text-gray-400' : 'text-black group-hover:text-black/70'
-        }`}>
+      <div className="space-y-2.5">
+        {/* Product name - editorial feel */}
+        <h3 className={`font-display text-base sm:text-lg leading-tight font-normal tracking-tight ${
+          product.is_sold_out ? 'text-text-light' : 'text-text-primary group-hover:text-rose-400'
+        } transition-colors duration-200`}>
           {product.title}
         </h3>
 
         {/* Category and price */}
         <div className="flex items-center justify-between gap-2">
-          <p className="text-xs uppercase tracking-[0.1em] text-black/60">
+          <p className="text-xs uppercase tracking-[0.1em] text-text-secondary font-medium">
             {product.category}
           </p>
           <p className={`text-sm font-semibold ${
-            product.is_sold_out ? 'text-gray-400' : 'text-black'
+            product.is_sold_out ? 'text-text-light' : 'text-rose-400'
           }`}>
             {formatPrice(product.price)}
           </p>
         </div>
 
-        {/* Colors info */}
+        {/* Colors info - subtle */}
         {product.colors?.length > 0 && (
-          <p className="text-xs uppercase tracking-[0.1em] text-black/40">
+          <p className="text-xs uppercase tracking-[0.1em] text-text-light font-normal">
             {product.colors.length} colour{product.colors.length !== 1 ? 's' : ''}
           </p>
         )}

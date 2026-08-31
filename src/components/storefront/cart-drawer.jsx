@@ -62,13 +62,13 @@ export function CartDrawer({ isOpen, onClose, whatsappNumber }) {
       />
       <aside className="absolute right-0 top-0 flex h-full w-full max-w-md flex-col bg-white shadow-xl animate-[slideInCart_260ms_ease-out]">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#EAE0E0] px-6 py-5">
+        <div className="flex items-center justify-between border-b border-border-light px-6 py-5">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-black/60">{checkout ? 'Details' : 'Shopping Bag'}</p>
-            <h2 className="text-lg font-bold text-black mt-1">{checkout ? 'Send order on WhatsApp' : `${totalItems} item${totalItems === 1 ? '' : 's'}`}</h2>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-text-secondary">{checkout ? 'Details' : 'Shopping Bag'}</p>
+            <h2 className="text-lg font-display font-normal text-text-primary mt-1">{checkout ? 'Send order on WhatsApp' : `${totalItems} item${totalItems === 1 ? '' : 's'}`}</h2>
           </div>
-          <button className="rounded-full border border-black/20 p-2 hover:bg-[#FAF5F5] transition" onClick={onClose} aria-label="Close cart">
-            <X className="h-5 w-5 text-black" />
+          <button className="rounded-lg border border-border-light p-2 hover:bg-cream-100 transition-colors" onClick={onClose} aria-label="Close cart">
+            <X className="h-5 w-5 text-text-primary" />
           </button>
         </div>
 
@@ -78,51 +78,51 @@ export function CartDrawer({ isOpen, onClose, whatsappNumber }) {
             <div className="flex-1 overflow-y-auto px-6">
               {items.length === 0 ? (
                 <div className="flex h-full flex-col items-center justify-center text-center py-12">
-                  <ShoppingBag className="mb-4 h-12 w-12 text-black/20" />
-                  <p className="text-lg font-semibold text-black">Your bag is empty</p>
-                  <p className="mt-2 text-sm text-black/60">Add a piece and checkout directly through WhatsApp.</p>
+                  <ShoppingBag className="mb-4 h-12 w-12 text-text-muted" />
+                  <p className="text-lg font-display font-normal text-text-primary">Your bag is empty</p>
+                  <p className="mt-2 text-sm text-text-secondary">Add a piece and checkout directly through WhatsApp.</p>
                 </div>
               ) : (
                 <div className="space-y-6 py-6">
                   {items.map((item) => (
-                    <div key={item.id} className="flex gap-4 pb-6 border-b border-[#F0EDED] last:border-b-0">
-                      <div className="relative h-28 w-20 flex-none overflow-hidden bg-[#FAFAFA]">
+                    <div key={item.id} className="flex gap-4 pb-6 border-b border-border-light last:border-b-0">
+                      <div className="relative h-28 w-20 flex-none overflow-hidden bg-cream-100 rounded-lg">
                         {item.imageUrl && <Image src={item.imageUrl} alt={item.title} fill sizes="80px" className="object-cover" />}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <Link href={`/products/${item.slug}`} onClick={onClose} className="text-sm font-semibold text-black hover:text-black/70">
+                        <Link href={`/products/${item.slug}`} onClick={onClose} className="text-sm font-medium text-text-primary hover:text-rose-400 transition-colors">
                           {item.title}
                         </Link>
-                        <p className="mt-1.5 text-xs text-black/60">Size {item.size}{item.color ? ` / ${item.color}` : ''}</p>
+                        <p className="mt-1.5 text-xs text-text-secondary">Size {item.size}{item.color ? ` / ${item.color}` : ''}</p>
                         {item.sku && (
-                          <p className="text-xs text-black/40 mt-0.5">SKU: {item.sku}</p>
+                          <p className="text-xs text-text-light mt-0.5">SKU: {item.sku}</p>
                         )}
                         <div className="mt-4 flex items-center justify-between">
-                          <div className="flex items-center border border-black/20">
+                          <div className="flex items-center border border-border-light rounded-md overflow-hidden">
                             <button 
-                              className="p-2 hover:bg-[#FAF5F5] transition" 
+                              className="p-2 hover:bg-cream-100 transition-colors" 
                               onClick={() => updateQuantity(item.id, item.quantity - 1)} 
                               aria-label="Decrease quantity"
                             >
-                              <Minus className="h-3.5 w-3.5 text-black" />
+                              <Minus className="h-3.5 w-3.5 text-text-primary" />
                             </button>
-                            <span className="w-8 text-center text-sm font-semibold text-black">{item.quantity}</span>
+                            <span className="w-8 text-center text-sm font-medium text-text-primary border-l border-r border-border-light">{item.quantity}</span>
                             <button 
-                              className="p-2 hover:bg-[#FAF5F5] transition" 
+                              className="p-2 hover:bg-cream-100 transition-colors" 
                               onClick={() => updateQuantity(item.id, item.quantity + 1)} 
                               aria-label="Increase quantity"
                             >
-                              <Plus className="h-3.5 w-3.5 text-black" />
+                              <Plus className="h-3.5 w-3.5 text-text-primary" />
                             </button>
                           </div>
                           <div className="text-right">
                             <button 
-                              className="text-xs font-bold uppercase tracking-[0.12em] text-black/60 hover:text-black transition" 
+                              className="text-xs font-semibold uppercase tracking-[0.12em] text-text-secondary hover:text-rose-400 transition-colors" 
                               onClick={() => removeFromCart(item.id)}
                             >
                               Remove
                             </button>
-                            <p className="text-sm font-bold text-black mt-2">{formatPrice(item.price * item.quantity)}</p>
+                            <p className="text-sm font-semibold text-rose-400 mt-2">{formatPrice(item.price * item.quantity)}</p>
                           </div>
                         </div>
                       </div>
@@ -134,13 +134,13 @@ export function CartDrawer({ isOpen, onClose, whatsappNumber }) {
 
             {/* Checkout section */}
             {items.length > 0 && (
-              <div className="border-t border-[#EAE0E0] bg-[#FAFAFA] p-6">
+              <div className="border-t border-border-light bg-cream-50 p-6">
                 <div className="mb-6 flex items-center justify-between">
-                  <span className="text-sm font-bold uppercase tracking-[0.12em] text-black/60">Subtotal</span>
-                  <span className="text-xl font-bold text-black">{formatPrice(totalPrice)}</span>
+                  <span className="text-sm font-semibold uppercase tracking-[0.12em] text-text-secondary">Subtotal</span>
+                  <span className="text-xl font-semibold text-rose-400">{formatPrice(totalPrice)}</span>
                 </div>
                 <button 
-                  className="w-full bg-black text-white px-5 py-4 font-bold text-sm uppercase tracking-[0.18em] hover:bg-black/80 transition-colors duration-300" 
+                  className="w-full bg-rose-400 text-white px-5 py-3 font-semibold text-sm uppercase tracking-[0.16em] hover:bg-rose-300 active:bg-rose-500 transition-all duration-200 rounded-md" 
                   onClick={() => setCheckout(true)}
                 >
                   Continue to WhatsApp
@@ -153,7 +153,7 @@ export function CartDrawer({ isOpen, onClose, whatsappNumber }) {
             <div className="flex-1 space-y-4 overflow-y-auto p-6">
               {Object.entries(initialCustomer).map(([field]) => (
                 <label key={field} className="block">
-                  <span className="mb-2 block text-xs font-bold uppercase tracking-[0.12em] text-black/60">
+                  <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-text-secondary">
                     {field === 'pincode' ? 'PIN Code' : field}
                   </span>
                   {field === 'address' ? (
@@ -161,34 +161,34 @@ export function CartDrawer({ isOpen, onClose, whatsappNumber }) {
                       value={customer[field]}
                       onChange={(event) => setCustomer({ ...customer, [field]: event.target.value })}
                       rows={3}
-                      className="w-full border border-[#EAE0E0] px-3 py-3 text-sm outline-none focus:border-black focus:ring-1 focus:ring-black/10"
+                      className="w-full border border-border-light bg-cream-50 px-3 py-3 text-sm rounded-md text-text-primary focus:border-rose-250 focus:bg-white focus:ring-1 focus:ring-rose-100 outline-none transition-all"
                     />
                   ) : (
                     <input
                       value={customer[field]}
                       onChange={(event) => setCustomer({ ...customer, [field]: event.target.value })}
-                      className="w-full border border-[#EAE0E0] px-3 py-3 text-sm outline-none focus:border-black focus:ring-1 focus:ring-black/10"
+                      className="w-full border border-border-light bg-cream-50 px-3 py-3 text-sm rounded-md text-text-primary focus:border-rose-250 focus:bg-white focus:ring-1 focus:ring-rose-100 outline-none transition-all"
                     />
                   )}
-                  {errors[field] && <span className="mt-1 block text-xs text-red-600">{errors[field]}</span>}
+                  {errors[field] && <span className="mt-1 block text-xs text-rose-400">{errors[field]}</span>}
                 </label>
               ))}
             </div>
 
             {/* Checkout footer */}
-            <div className="border-t border-[#EAE0E0] bg-[#FAFAFA] p-6">
+            <div className="border-t border-border-light bg-cream-50 p-6">
               <div className="mb-6 flex items-center justify-between">
-                <span className="text-sm font-bold uppercase tracking-[0.12em] text-black/60">Total</span>
-                <span className="text-xl font-bold text-black">{formatPrice(totalPrice)}</span>
+                <span className="text-sm font-semibold uppercase tracking-[0.12em] text-text-secondary">Total</span>
+                <span className="text-xl font-semibold text-rose-400">{formatPrice(totalPrice)}</span>
               </div>
               <button 
-                className="w-full bg-[#128c7e] text-white px-5 py-4 font-bold text-sm uppercase tracking-[0.18em] hover:bg-[#0f766b] transition-colors duration-300"
+                className="w-full bg-[#128c7e] text-white px-5 py-3 font-semibold text-sm uppercase tracking-[0.16em] hover:bg-[#0f6d57] transition-all duration-200 rounded-md"
               >
                 Send order on WhatsApp
               </button>
               <button 
                 type="button" 
-                className="mt-3 w-full py-3 text-xs font-bold uppercase tracking-[0.12em] text-black/60 hover:text-black transition" 
+                className="mt-3 w-full py-3 text-xs font-semibold uppercase tracking-[0.12em] text-text-secondary hover:text-rose-400 transition" 
                 onClick={() => setCheckout(false)}
               >
                 Back to cart

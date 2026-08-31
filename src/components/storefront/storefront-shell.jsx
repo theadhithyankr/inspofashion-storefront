@@ -75,12 +75,12 @@ function Header({ menu, general, products, collections, onCartClick }) {
     <>
       {/* Sticky Header - Transparent overlay */}
       <header className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
-        scrolled ? 'bg-white/95 backdrop-blur-sm border-b border-black/10' : 'bg-transparent'
+        scrolled ? 'bg-cream-100/95 backdrop-blur-sm border-b border-border-light' : 'bg-transparent'
       }`}>
         <div className="mx-auto max-w-full px-6 sm:px-8 lg:px-16">
           <div className="flex h-16 sm:h-20 items-center justify-between">
             {/* Logo - Left */}
-            <Link href="/" className="font-display text-2xl sm:text-3xl lg:text-4xl italic tracking-normal text-black flex-shrink-0">
+            <Link href="/" className="font-display text-2xl sm:text-3xl lg:text-4xl italic tracking-normal text-text-primary flex-shrink-0">
               {general?.store_name || 'Inspofashions'}
             </Link>
 
@@ -90,7 +90,7 @@ function Header({ menu, general, products, collections, onCartClick }) {
                 <Link 
                   key={`${link.name}-${link.url}`} 
                   href={sanitizeUrl(link.url)} 
-                  className="text-xs font-bold uppercase tracking-[0.2em] text-black/80 hover:text-black transition-colors duration-300"
+                  className="text-xs font-bold uppercase tracking-[0.2em] text-text-secondary hover:text-text-primary transition-colors duration-300"
                 >
                   {link.name}
                 </Link>
@@ -101,7 +101,7 @@ function Header({ menu, general, products, collections, onCartClick }) {
             <div className="flex items-center justify-end gap-6 sm:gap-8 flex-shrink-0">
               {/* Mobile Menu Button */}
               <button className="lg:hidden p-2 hover:scale-105 transition-transform duration-200" onClick={() => setMenuOpen(true)} aria-label="Open menu">
-                <Menu className="h-5 w-5 text-black" />
+                <Menu className="h-5 w-5 text-text-primary" />
               </button>
 
               {/* Search Icon - Mobile & Desktop */}
@@ -110,7 +110,7 @@ function Header({ menu, general, products, collections, onCartClick }) {
                 onClick={() => setSearchOpen(true)} 
                 aria-label="Search"
               >
-                <Search className="h-5 w-5 text-black" />
+                <Search className="h-5 w-5 text-text-primary" />
               </button>
 
               {/* Cart Icon */}
@@ -119,9 +119,9 @@ function Header({ menu, general, products, collections, onCartClick }) {
                 onClick={onCartClick} 
                 aria-label="Open cart"
               >
-                <ShoppingBag className="h-5 w-5 text-black" />
+                <ShoppingBag className="h-5 w-5 text-text-primary" />
                 {totalItems > 0 && (
-                  <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-black text-white text-[9px] font-bold">
+                  <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-400 text-white text-[9px] font-bold">
                     {totalItems > 99 ? '99+' : totalItems}
                   </span>
                 )}
@@ -141,67 +141,67 @@ function Header({ menu, general, products, collections, onCartClick }) {
         />
         
         {/* Side drawer - Fixed position */}
-        <div className="fixed top-0 left-0 bottom-0 w-[82vw] max-w-xs flex flex-col bg-white backdrop-blur-sm z-50 animate-[slideInLeft_300ms_ease-out] shadow-lg">
+        <div className="fixed top-0 left-0 bottom-0 w-[82vw] max-w-xs flex flex-col bg-cream-100 backdrop-blur-sm z-50 animate-[slideInLeft_300ms_ease-out] shadow-lg">
           {/* Header with close button */}
-          <div className="flex items-center justify-between border-b border-black/10 px-6 py-4">
-            <span className="font-display text-xl italic text-black">{general?.store_name || 'Inspofashions'}</span>
+          <div className="flex items-center justify-between border-b border-border-light px-6 py-4">
+            <span className="font-display text-xl italic text-text-primary">{general?.store_name || 'Inspofashions'}</span>
             <button 
-              className="rounded-full p-1.5 hover:bg-black/5 transition-colors duration-300" 
+              className="rounded-full p-1.5 hover:bg-rose-100 transition-colors duration-300" 
               onClick={() => setMenuOpen(false)} 
               aria-label="Close menu"
             >
-              <X className="h-4 w-4 text-black" />
+              <X className="h-4 w-4 text-text-primary" />
             </button>
           </div>
 
           {/* Navigation links */}
           <nav className="flex-1 overflow-y-auto">
-            <p className="px-6 pt-6 pb-3 text-xs font-bold uppercase tracking-[0.2em] text-black/60">Collections</p>
+            <p className="px-6 pt-6 pb-3 text-xs font-bold uppercase tracking-[0.2em] text-text-light">Collections</p>
             
-            {navLinks.map((link, index) => (
+            {navLinks.map((link) => (
               <Link
                 key={`${link.name}-${link.url}`}
                 href={sanitizeUrl(link.url)}
                 onClick={() => setMenuOpen(false)}
-                className="group flex items-center justify-between border-b border-black/8 px-6 py-4 text-sm font-semibold text-black hover:bg-black/2 transition-colors duration-300"
+                className="group flex items-center justify-between border-b border-border-subtle px-6 py-4 text-sm font-semibold text-text-primary hover:bg-rose-50 transition-colors duration-300"
               >
                 <span>{link.name}</span>
-                <span className="text-black/30 transition-all duration-300 group-hover:translate-x-1 group-hover:text-black/70">→</span>
+                <span className="text-text-light transition-all duration-300 group-hover:translate-x-1 group-hover:text-rose-400">→</span>
               </Link>
             ))}
 
             {/* Additional links section */}
-            <div className="border-t border-black/10 mt-4">
-              <p className="px-6 pt-6 pb-3 text-xs font-bold uppercase tracking-[0.2em] text-black/60">Help</p>
+            <div className="border-t border-border-light mt-4">
+              <p className="px-6 pt-6 pb-3 text-xs font-bold uppercase tracking-[0.2em] text-text-light">Help</p>
               <Link 
                 href="/shipping-returns" 
                 onClick={() => setMenuOpen(false)} 
-                className="group flex items-center justify-between border-b border-black/8 px-6 py-4 text-sm font-semibold text-black hover:bg-black/2 transition-colors duration-300"
+                className="group flex items-center justify-between border-b border-border-subtle px-6 py-4 text-sm font-semibold text-text-primary hover:bg-rose-50 transition-colors duration-300"
               >
                 <span>Shipping & Returns</span>
-                <span className="text-black/30 transition-all duration-300 group-hover:translate-x-1 group-hover:text-black/70">→</span>
+                <span className="text-text-light transition-all duration-300 group-hover:translate-x-1 group-hover:text-rose-400">→</span>
               </Link>
               <Link 
                 href="/size-guide" 
                 onClick={() => setMenuOpen(false)} 
-                className="group flex items-center justify-between border-b border-black/8 px-6 py-4 text-sm font-semibold text-black hover:bg-black/2 transition-colors duration-300"
+                className="group flex items-center justify-between border-b border-border-subtle px-6 py-4 text-sm font-semibold text-text-primary hover:bg-rose-50 transition-colors duration-300"
               >
                 <span>Size Guide</span>
-                <span className="text-black/30 transition-all duration-300 group-hover:translate-x-1 group-hover:text-black/70">→</span>
+                <span className="text-text-light transition-all duration-300 group-hover:translate-x-1 group-hover:text-rose-400">→</span>
               </Link>
               <Link 
                 href="/contact" 
                 onClick={() => setMenuOpen(false)} 
-                className="group flex items-center justify-between px-6 py-4 text-sm font-semibold text-black hover:bg-black/2 transition-colors duration-300"
+                className="group flex items-center justify-between px-6 py-4 text-sm font-semibold text-text-primary hover:bg-rose-50 transition-colors duration-300"
               >
                 <span>Contact</span>
-                <span className="text-black/30 transition-all duration-300 group-hover:translate-x-1 group-hover:text-black/70">→</span>
+                <span className="text-text-light transition-all duration-300 group-hover:translate-x-1 group-hover:text-rose-400">→</span>
               </Link>
             </div>
           </nav>
 
           {/* Footer text */}
-          <div className="border-t border-black/10 px-6 py-6 text-xs leading-6 text-black/60">
+          <div className="border-t border-border-light px-6 py-6 text-xs leading-6 text-text-secondary">
             Premium clothing curated for easy everyday ordering.
           </div>
         </div>
@@ -209,30 +209,30 @@ function Header({ menu, general, products, collections, onCartClick }) {
       )}
 
       {searchOpen && (
-      <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
+      <div className="fixed inset-0 z-50 bg-cream-100 overflow-y-auto">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 py-6 sm:py-8">
           {/* Search header */}
-          <div className="mb-8 flex items-center justify-between border-b border-[#EAE0E0] pb-6">
-            <span className="text-xs font-bold uppercase tracking-[0.18em] text-black/60">Search</span>
+          <div className="mb-8 flex items-center justify-between border-b border-border-light pb-6">
+            <span className="text-xs font-bold uppercase tracking-[0.18em] text-text-light">Search</span>
             <button 
-              className="rounded-full border border-black/20 p-2 hover:bg-[#FAF5F5] transition" 
+              className="rounded-full border border-border-light p-2 hover:bg-rose-50 transition" 
               onClick={() => setSearchOpen(false)} 
               aria-label="Close search"
             >
-              <X className="h-5 w-5 text-black" />
+              <X className="h-5 w-5 text-text-primary" />
             </button>
           </div>
 
           {/* Search input */}
-          <form onSubmit={submitSearch} className="mb-6 border-b border-black pb-3">
+          <form onSubmit={submitSearch} className="mb-6 border-b border-text-secondary pb-3">
             <div className="flex items-center gap-3">
-              <Search className="h-5 w-5 text-black/40 flex-shrink-0" />
+              <Search className="h-5 w-5 text-text-light flex-shrink-0" />
               <input
                 ref={searchInputRef}
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search products, categories..."
-                className="w-full bg-transparent text-lg sm:text-2xl font-display outline-none placeholder:text-black/30"
+                className="w-full bg-transparent text-lg sm:text-2xl font-display outline-none placeholder:text-text-light"
               />
             </div>
           </form>
@@ -240,7 +240,7 @@ function Header({ menu, general, products, collections, onCartClick }) {
           {/* Results */}
           <div className="space-y-2">
             {query.trim() && suggestions.length === 0 && (
-              <div className="rounded-sm bg-[#FAF5F5] px-4 py-5 text-sm text-black/60">
+              <div className="rounded-sm bg-rose-50 px-4 py-5 text-sm text-text-secondary">
                 No results found. Press Enter to search the full catalog.
               </div>
             )}
@@ -249,10 +249,10 @@ function Header({ menu, general, products, collections, onCartClick }) {
                 key={product.id} 
                 href={`/products/${product.slug}`} 
                 onClick={() => setSearchOpen(false)} 
-                className="block rounded-sm px-3 py-4 transition hover:bg-[#FAF5F5]"
+                className="block rounded-sm px-3 py-4 transition hover:bg-rose-50"
               >
-                <span className="text-base font-semibold text-black">{product.title}</span>
-                <span className="ml-2 text-xs text-black/60">{product.category}</span>
+                <span className="text-base font-semibold text-text-primary">{product.title}</span>
+                <span className="ml-2 text-xs text-text-light">{product.category}</span>
               </Link>
             ))}
           </div>
@@ -272,26 +272,26 @@ function Footer({ footer, general }) {
   ]
 
   return (
-    <footer className="bg-white border-t border-gray-200 text-black">
+    <footer className="bg-white border-t border-border-light text-text-primary">
       <div className="mx-auto max-w-full px-6 sm:px-8 lg:px-16 py-16 sm:py-20">
         <div className="grid gap-12 md:gap-16 md:grid-cols-4">
           {/* Brand info */}
           <div>
-            <div className="font-display text-2xl italic text-black mb-4">
+            <div className="font-display text-2xl italic text-text-primary mb-4">
               {general?.store_name || 'Inspofashions'}
             </div>
-            <p className="text-sm leading-6 text-black/70 mb-6 max-w-sm">
+            <p className="text-sm leading-6 text-text-secondary mb-6 max-w-sm">
               Premium clothing curated for easy everyday ordering.
             </p>
             {footer?.company_info?.email && (
-              <p className="text-sm text-black/60">{footer?.company_info?.email || general?.support_email}</p>
+              <p className="text-sm text-text-light">{footer?.company_info?.email || general?.support_email}</p>
             )}
           </div>
 
           {/* Footer sections */}
           {sections.map((section) => (
             <div key={section.id || section.title}>
-              <h3 className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-black/80">
+              <h3 className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-text-primary">
                 {section.title}
               </h3>
               <ul className="space-y-3 text-sm">
@@ -299,7 +299,7 @@ function Footer({ footer, general }) {
                   <li key={`${section.title}-${link.name}`}>
                     <Link 
                       href={sanitizeUrl(link.url)} 
-                      className="text-black/70 hover:text-black transition-colors duration-300"
+                      className="text-text-secondary hover:text-rose-400 transition-colors duration-300"
                     >
                       {link.name}
                     </Link>
@@ -311,7 +311,7 @@ function Footer({ footer, general }) {
         </div>
 
         {/* Copyright */}
-        <div className="border-t border-gray-200 mt-16 pt-8 text-center text-xs text-black/50">
+        <div className="border-t border-border-light mt-16 pt-8 text-center text-xs text-text-light">
           © {new Date().getFullYear()} {general?.store_name || 'Inspofashions'}. WhatsApp checkout only.
         </div>
       </div>

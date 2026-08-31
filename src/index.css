@@ -12,7 +12,7 @@
   }
 
   body {
-    @apply bg-white text-brand-900 antialiased;
+    @apply bg-cream-100 text-text-primary antialiased;
     /* Improve mobile performance */
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -24,7 +24,7 @@
   input,
   textarea,
   select {
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:ring-offset-2;
     /* Disable tap highlight on mobile */
     -webkit-tap-highlight-color: transparent;
   }
@@ -34,11 +34,11 @@
   }
 
   ::selection {
-    @apply bg-black text-white;
+    @apply bg-rose-300 text-text-primary;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-display tracking-tight;
+    @apply font-display tracking-tight text-text-primary;
   }
 }
 
@@ -56,20 +56,140 @@
     scrollbar-width: none; /* Firefox */
   }
 
+  /* Premium button styles - refined, fashion-forward */
   .btn-primary {
-    @apply bg-white text-black px-8 py-4 rounded-none font-bold text-sm uppercase tracking-[0.2em]
-           hover:bg-black hover:text-white transition-all duration-500
-           focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2;
-    /* Better mobile touch target (minimum 44px) */
+    @apply bg-rose-400 text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-md font-semibold text-xs uppercase tracking-[0.16em]
+           hover:bg-rose-300 active:bg-rose-500 disabled:bg-rose-200 disabled:cursor-not-allowed
+           transition-all duration-200 ease-out
+           focus:outline-none focus:ring-2 focus:ring-rose-250 focus:ring-offset-2 focus:ring-offset-cream-100;
     min-height: 44px;
+    letter-spacing: 0.025em;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px);
   }
 
   .btn-secondary {
-    @apply border-2 border-white text-white px-8 py-4 rounded-none font-bold text-sm uppercase tracking-[0.2em]
-           hover:bg-white hover:text-black transition-all duration-500
-           focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black;
-    /* Better mobile touch target (minimum 44px) */
+    @apply border border-text-secondary text-text-primary px-6 sm:px-8 py-2.5 sm:py-3 rounded-md font-semibold text-xs uppercase tracking-[0.16em]
+           hover:bg-rose-50 hover:border-rose-300 active:bg-rose-100 disabled:opacity-50 disabled:cursor-not-allowed
+           transition-all duration-200 ease-out
+           focus:outline-none focus:ring-2 focus:ring-rose-200 focus:ring-offset-2 focus:ring-offset-cream-100;
     min-height: 44px;
+    letter-spacing: 0.025em;
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  .btn-ghost {
+    @apply text-text-secondary px-4 py-2 rounded-md font-semibold text-xs uppercase tracking-[0.15em]
+           hover:text-rose-400 hover:bg-rose-50 transition-all duration-200 ease-out
+           focus:outline-none focus:ring-2 focus:ring-rose-200 focus:ring-offset-1 focus:ring-offset-cream-100;
+  }
+
+  /* Enhanced typography hierarchy */
+  h1, h2, h3, h4, h5, h6 {
+    letter-spacing: -0.015em;
+  }
+
+  /* Section headings - elegant and editorial */
+  .section-heading {
+    @apply font-display text-3xl sm:text-4xl lg:text-5xl xl:text-6xl text-text-primary font-normal leading-tight tracking-tight;
+  }
+
+  .section-heading-sm {
+    @apply font-display text-2xl sm:text-3xl text-text-primary font-normal leading-tight tracking-tight;
+  }
+
+  /* Section label/eyebrow */
+  .section-label {
+    @apply text-xs font-semibold uppercase tracking-[0.2em] text-text-secondary mb-3 sm:mb-4;
+    letter-spacing: 0.2em;
+  }
+
+  /* Card styles - minimal, refined with subtle presence */
+  .card-base {
+    @apply bg-white rounded-lg border border-border-subtle transition-all duration-300;
+  }
+
+  .card-elevated {
+    @apply bg-white rounded-lg border border-border-subtle transition-all duration-300 shadow-soft hover:shadow-sm;
+  }
+
+  .card-product {
+    @apply bg-cream-50 rounded-lg border border-border-subtle transition-all duration-300 overflow-hidden;
+  }
+
+  /* Body text utilities - optimized for readability */
+  .text-body {
+    @apply text-sm sm:text-base text-text-primary leading-relaxed;
+    line-height: 1.6;
+  }
+
+  .text-caption {
+    @apply text-xs uppercase tracking-[0.1em] text-text-light font-medium;
+  }
+
+  .text-muted {
+    @apply text-sm text-text-secondary leading-relaxed;
+    line-height: 1.6;
+  }
+
+  .text-subtext {
+    @apply text-xs sm:text-sm text-text-light font-normal;
+  }
+
+  /* Price styling - prominent but elegant */
+  .price-display {
+    @apply text-lg sm:text-xl font-semibold text-rose-400;
+  }
+
+  .price-original {
+    @apply text-sm text-text-light line-through;
+  }
+
+  /* Input and form elements - refined styling */
+  input,
+  textarea,
+  select {
+    @apply rounded-md border border-border-light bg-cream-50 text-text-primary
+           placeholder:text-text-muted placeholder:font-normal
+           transition-all duration-200;
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus {
+    @apply border-rose-250 bg-white shadow-sm;
+  }
+
+  /* Border utilities - very subtle */
+  .border-hairline {
+    @apply border border-border-subtle;
+  }
+
+  .border-divider {
+    @apply border-b border-border-light;
+  }
+
+  /* Shadow utilities - refined, minimal */
+  .shadow-soft {
+    @apply shadow-soft;
+  }
+
+  .shadow-xs {
+    @apply shadow-xs;
+  }
+
+  /* Link hover state - tasteful underline */
+  a {
+    @apply transition-colors duration-200;
+  }
+
+  a:hover {
+    @apply text-rose-400;
   }
 
   /* Smooth animations on mobile */

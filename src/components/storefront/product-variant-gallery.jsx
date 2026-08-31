@@ -89,7 +89,7 @@ export function ProductVariantGallery({ product, selectedColor, onColorChange })
 
   if (galleryImages.length === 0) {
     return (
-      <div className="w-full bg-white rounded-lg" style={{ aspectRatio: '3 / 4' }} />
+      <div className="w-full bg-cream-100 rounded-lg" style={{ aspectRatio: '3 / 4' }} />
     )
   }
 
@@ -98,7 +98,7 @@ export function ProductVariantGallery({ product, selectedColor, onColorChange })
       {/* Gallery Container */}
       <div
         ref={containerRef}
-        className="relative w-full overflow-hidden rounded-lg bg-white cursor-grab active:cursor-grabbing select-none"
+        className="relative w-full overflow-hidden rounded-lg bg-cream-100 cursor-grab active:cursor-grabbing select-none"
         style={{ aspectRatio: '3 / 4' }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -115,7 +115,7 @@ export function ProductVariantGallery({ product, selectedColor, onColorChange })
           {galleryImages.map((image, idx) => (
             <div
               key={`${activeColor}-${idx}`}
-              className="relative w-full h-full flex-shrink-0 flex items-center justify-center bg-white"
+              className="relative w-full h-full flex-shrink-0 flex items-center justify-center bg-cream-100"
             >
               <Image
                 src={image}
@@ -164,21 +164,21 @@ export function ProductVariantGallery({ product, selectedColor, onColorChange })
 
       {/* Color Selection */}
       {colors.length > 0 && (
-        <div className="mt-6 rounded-lg border border-black/10 bg-white p-4">
+        <div className="mt-6 rounded-lg border border-border-light bg-cream-50 p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-black/60">Colour</p>
-              <p className="mt-1 text-sm font-semibold text-black">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-text-secondary">Colour</p>
+              <p className="mt-1 text-sm font-medium text-text-primary">
                 {activeColor ? `Selected: ${getDisplayColor(product, activeColor)}` : 'Choose a colour'}
               </p>
             </div>
             {mappedImages.length > 0 && (
-              <p className="text-xs text-black/60">{mappedImages.length} image{mappedImages.length > 1 ? 's' : ''}</p>
+              <p className="text-xs text-text-light">{mappedImages.length} image{mappedImages.length > 1 ? 's' : ''}</p>
             )}
           </div>
 
           {preloadStatus === 'loading' && (
-            <p className="mt-2 text-xs text-black/60">Loading images...</p>
+            <p className="mt-2 text-xs text-text-light">Loading images...</p>
           )}
 
           <div className="mt-4 flex flex-wrap gap-3">
@@ -205,23 +205,23 @@ export function ProductVariantGallery({ product, selectedColor, onColorChange })
                   disabled={isOutOfStock}
                   aria-pressed={isActive}
                   aria-label={`${color}${isOutOfStock ? ' (out of stock)' : ''}`}
-                  className={`flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-semibold transition ${
+                  className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-all ${
                     isActive
-                      ? 'border-black bg-black text-white'
+                      ? 'border-rose-400 bg-rose-50 text-rose-400'
                       : isOutOfStock
-                        ? 'border-black/15 bg-black/5 text-black/40 cursor-not-allowed opacity-50'
-                        : 'border-black/15 bg-white text-black hover:border-black'
+                        ? 'border-border-light bg-cream-100 text-text-light cursor-not-allowed opacity-50'
+                        : 'border-border-light bg-white text-text-primary hover:border-rose-250 hover:bg-rose-50'
                   }`}
                 >
                   <span
                     className={`relative h-7 w-7 rounded-full border ${
-                      isLightSwatch ? 'border-black/30' : 'border-white'
-                    } shadow-sm`}
+                      isLightSwatch ? 'border-text-light/50' : 'border-rose-100'
+                    } shadow-xs`}
                     style={{ backgroundColor: hex }}
                     aria-hidden="true"
                   >
                     {isActive && (
-                      <span className="absolute inset-0 m-auto h-2.5 w-2.5 rounded-full bg-white shadow" />
+                      <span className="absolute inset-0 m-auto h-2.5 w-2.5 rounded-full bg-rose-400 shadow-sm" />
                     )}
                   </span>
                   <span className="flex flex-col items-start">
