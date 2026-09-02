@@ -39,6 +39,20 @@ export function CartDrawer({ isOpen, onClose, whatsappNumber }) {
 
   const submit = (event) => {
     event.preventDefault()
+    
+    // Validate stock before checkout
+    const stockErrors = {}
+    items.forEach((item) => {
+      if (item.stock != null && item.quantity > item.stock) {
+        stockErrors[`stock-${item.id}`] = `Only ${item.stock} in stock for ${item.title}${item.color ? ` (${item.color})` : ''}.`
+      }
+    })
+    
+    if (Object.keys(stockErrors).length > 0) {
+      setErrors(stockErrors)
+      return
+    }
+    
     const nextErrors = validateCheckout(customer)
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length > 0) return
@@ -108,9 +122,10 @@ export function CartDrawer({ isOpen, onClose, whatsappNumber }) {
                             </button>
                             <span className="w-8 text-center text-sm font-medium text-text-primary border-l border-r border-border-light">{item.quantity}</span>
                             <button 
-                              className="p-2 hover:bg-cream-100 transition-colors" 
-                              onClick={() => updateQuantity(item.id, item.quantity + 1)} 
+                              className="p-2 hover:bg-cream-100 transition-colors disabled:cursor-not-allowed disabled:opacity-50" 
+                              onClick={() => updateQuantity(item.id, Math.min(item.stock ?? Infinity, item.quantity + 1))} 
                               aria-label="Increase quantity"
+                              disabled={item.stock != null && item.quantity >= item.stock}
                             >
                               <Plus className="h-3.5 w-3.5 text-text-primary" />
                             </button>
@@ -150,6 +165,19 @@ export function CartDrawer({ isOpen, onClose, whatsappNumber }) {
           </>
         ) : (
           <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col">
+            {/* Stock validation errors */}
+            {Object.entries(errors).some(([key]) => key.startsWith('stock-')) && (
+              <div className="border-b border-border-light bg-red-50 px-6 py-4">
+                {Object.entries(errors).map(([key, message]) => 
+                  key.startsWith('stock-') ? (
+                    <p key={key} className="text-xs text-red-700 font-medium mb-2 last:mb-0">
+                      {message}
+                    </p>
+                  ) : null
+                )}
+              </div>
+            )}
+            
             <div className="flex-1 space-y-4 overflow-y-auto p-6">
               {Object.entries(initialCustomer).map(([field]) => (
                 <label key={field} className="block">

@@ -20,6 +20,7 @@ export function ProductVariantGallery({ product, selectedColor, onColorChange })
   const [preloadStatus, setPreloadStatus] = useState('idle')
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
+  const [imageErrors, setImageErrors] = useState(new Set())
   
   const containerRef = useRef(null)
   const sliderRef = useRef(null)
@@ -37,19 +38,34 @@ export function ProductVariantGallery({ product, selectedColor, onColorChange })
       })
   }, [product])
 
-  const variantColors = useMemo(() => getProductVariantColors(product), [product])
   const variantMap = useMemo(() => product.variantMap || {}, [product.variantMap])
-  const declaredColors = product.colors?.filter(Boolean) || []
-  const colors = declaredColors.length > 0 ? declaredColors : variantColors
+
+  // Prefer colors sourced directly from variantMap (i.e. real product_variants rows).
+  // Each entry in variantMap has the original color name stored under .color, so we
+  // reconstruct an ordered list from it.  Fall back to product.colors (product-level
+  // field) and then to image/tag inference only when no variants exist at all.
+  const colors = useMemo(() => {
+    const variantEntries = Object.values(variantMap)
+    if (variantEntries.length > 0) {
+      return variantEntries.map((v) => v.color).filter(Boolean)
+    }
+    const declared = product.colors?.filter(Boolean) || []
+    if (declared.length > 0) return declared
+    return getProductVariantColors(product)
+  }, [variantMap, product])
 
   const activeColor = colors.find((color) => normalizeColorForCompare(color) === normalizeColorForCompare(selectedColor)) || colors[0] || ''
   const mappedImages = activeColor ? getProductVariantImages(product, activeColor) : []
-  const galleryImages = mappedImages.length > 0 ? mappedImages : product.images || []
+  const allImages = mappedImages.length > 0 ? mappedImages : product.images || []
+  
+  // Filter out images that have errored
+  const galleryImages = allImages.filter((img) => !imageErrors.has(img))
 
   // Reset when color changes
   useEffect(() => {
     setCurrentIndex(0)
     setIsAnimating(false)
+    setImageErrors(new Set()) // Clear errors when color changes
   }, [activeColor])
 
   // Handle touch start
@@ -125,6 +141,10 @@ export function ProductVariantGallery({ product, selectedColor, onColorChange })
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 60vw"
                 className="object-cover"
                 draggable="false"
+                onError={() => {
+                  // Silently filter out broken images
+                  setImageErrors((prev) => new Set([...prev, image]))
+                }}
               />
             </div>
           ))}

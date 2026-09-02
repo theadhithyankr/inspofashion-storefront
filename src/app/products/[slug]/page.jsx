@@ -37,6 +37,16 @@ export default async function ProductPage({ params }) {
     .filter((item) => item.id !== product.id && item.category === product.category)
     .slice(0, 4)
 
+  // Determine availability based on variant stock.
+  // If at least one variant has stock > 0, the product is in stock.
+  // If all variants have stock = 0 (or no variants), use product-level is_sold_out.
+  const hasVariantsInStock = product.variants?.length > 0
+    ? product.variants.some((v) => v.stock > 0)
+    : false
+  const availability = hasVariantsInStock || !product.is_sold_out
+    ? 'https://schema.org/InStock'
+    : 'https://schema.org/OutOfStock'
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -48,7 +58,7 @@ export default async function ProductPage({ params }) {
       '@type': 'Offer',
       priceCurrency: 'INR',
       price: Number(product.price).toFixed(2),
-      availability: 'https://schema.org/InStock',
+      availability,
     },
   }
 

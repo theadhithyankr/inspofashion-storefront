@@ -52,7 +52,16 @@ function normalizeProduct(product) {
   }
 
   // ✅ NEW: Create variant map for efficient color lookups
-  const variantMap = createVariantMap(product.variants)
+  // product_variants is the joined key returned by Supabase; fall back to product.variants for any local/mock data
+  const variants = product.product_variants || product.variants || []
+  const variantMap = createVariantMap(variants)
+
+  // For variant products, sold-out only when ALL variants have stock <= 0.
+  // For non-variant products, use the product-level quantity.
+  const hasVariants = variants.length > 0
+  const isSoldOut = hasVariants
+    ? variants.every((v) => !v || v.stock_quantity <= 0)  // all variants are out of stock
+    : Number(product.quantity || 0) === 0  // no variants; use product quantity
 
   return {
     ...product,
@@ -63,7 +72,8 @@ function normalizeProduct(product) {
     colors: colors.map((color) => color?.toString().trim()).filter(Boolean),
     tags: Array.isArray(product.tags) ? product.tags : [],
     quantity: Number(product.quantity || 0),
-    is_sold_out: Number(product.quantity || 0) === 0,
+    is_sold_out: isSoldOut,
+    variants,    // normalised variants array (product_variants or product.variants)
     variantMap, // ✅ NEW: Add variant metadata map
   }
 }
@@ -79,7 +89,7 @@ export const getProducts = cache(async () => {
   try {
     const { data, error } = await getSupabase()
       .from('products')
-      .select('*', { count: 'estimated' })
+      .select('*, product_variants(*)', { count: 'estimated' })
       .eq('is_active', true)
       .order('created_at', { ascending: false })
 
@@ -87,7 +97,21 @@ export const getProducts = cache(async () => {
       console.error('Error fetching products:', error)
       throw error
     }
-    return (data || []).map(normalizeProduct)
+
+    // Filter variants to only active ones, then deduplicate products
+    const seenIds = new Set()
+    const deduped = (data || [])
+      .filter((product) => {
+        if (seenIds.has(product.id)) return false
+        seenIds.add(product.id)
+        return true
+      })
+      .map((product) => ({
+        ...product,
+        product_variants: (product.product_variants || []).filter((v) => v && v.is_active !== false),
+      }))
+
+    return deduped.map(normalizeProduct)
   } catch (err) {
     console.error('Failed to fetch products:', err)
     return []
@@ -158,7 +182,7 @@ export async function getProductBySlug(slug) {
 
 export async function getCollectionBySlug(slug) {
   const collections = await getCollections()
-  return collections.find((collection) => getCollectionSlug(collection) === slug) || null
+  return collections.find((collection) => collection.slug === slug) || null
 }
 
 export async function getProductsForCollection(slug) {

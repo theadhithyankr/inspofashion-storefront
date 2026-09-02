@@ -86,11 +86,24 @@ function imageContainsColor(image = '', color = '') {
 
 function readImageList(value) {
   if (!value) return []
-  if (Array.isArray(value)) return value.filter(Boolean).map(String)
+  if (Array.isArray(value)) {
+    return value
+      .filter(Boolean)
+      .map((item) => {
+        // If item is already a string, use it
+        if (typeof item === 'string') return item.trim()
+        // If item is an object, try to extract URL from common fields
+        if (typeof item === 'object' && item !== null) {
+          return item.url || item.image_url || item.imageUrl || item.src || item.href || ''
+        }
+        return String(item).trim()
+      })
+      .filter(Boolean)
+  }
   if (typeof value === 'string') return value.trim() ? [value.trim()] : []
   if (typeof value === 'object') {
-    if (Array.isArray(value.images)) return value.images.filter(Boolean).map(String)
-    if (Array.isArray(value.imageUrls)) return value.imageUrls.filter(Boolean).map(String)
+    if (Array.isArray(value.images)) return readImageList(value.images)
+    if (Array.isArray(value.imageUrls)) return readImageList(value.imageUrls)
 
     const directImage = value.image_url ?? value.imageUrl ?? value.image ?? value.url
     if (directImage) return [String(directImage).trim()].filter(Boolean)
@@ -99,11 +112,19 @@ function readImageList(value) {
 }
 
 function getVariantImages(variant = {}) {
-  return readImageList(variant.images ?? variant.image_urls ?? variant.imageUrls ?? [variant.image_url ?? variant.imageUrl ?? variant.image])
+  // variant_images is the actual Supabase column name on product_variants rows.
+  // variant.images is kept as a fallback for any legacy/mock data.
+  return readImageList(
+    variant.variant_images ??
+    variant.images ??
+    variant.image_urls ??
+    variant.imageUrls ??
+    [variant.image_url ?? variant.imageUrl ?? variant.image]
+  )
 }
 
 function getVariantColorName(variant = {}) {
-  return variant.color ?? variant.name ?? variant.option1 ?? variant.option_value ?? variant.option1_value ?? variant.option2 ?? variant.option2_value ?? variant.value
+  return variant.color_name ?? variant.color ?? variant.name ?? variant.option1 ?? variant.option_value ?? variant.option1_value ?? variant.option2 ?? variant.option2_value ?? variant.value
 }
 
 function getVariantImageMap(product = {}) {
@@ -221,20 +242,25 @@ export function createVariantMap(variants = []) {
   variants.forEach((variant) => {
     if (!variant) return
     
-    const colorName = variant.color || variant.name || variant.option1 || ''
+    // Check multiple possible color field names from database
+    const colorName = variant.color_name || variant.color || variant.name || variant.option1 || ''
     if (!colorName) return
     
     const normalized = compactColorName(colorName)
     if (!normalized) return
     
     // Store variant metadata keyed by normalized color name
+    // variant_images is the Supabase column; fall back to variant.images for legacy data
+    // stock_quantity is the Supabase column; fall back to variant.stock for legacy data
+    const variantImages = variant.variant_images ?? variant.images
+    const variantStock = variant.stock_quantity ?? variant.stock ?? 0
     map[normalized] = {
       id: variant.id,
       color: colorName,
       color_code: variant.color_code || null,
       sku: variant.sku || null,
-      stock: variant.stock || 0,
-      images: Array.isArray(variant.images) ? variant.images : [],
+      stock: variantStock,
+      images: Array.isArray(variantImages) ? variantImages : [],
       price: variant.price || null,
     }
   })

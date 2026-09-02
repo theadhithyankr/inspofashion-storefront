@@ -11,7 +11,9 @@ function normalizeColorForCompare(value = '') {
 
 export function ProductPurchasePanel({ product, selectedColor }) {
   const availableSizes = useMemo(() => product.sizes?.filter(Boolean) || [], [product.sizes])
-  const [size, setSize] = useState(availableSizes[0] || 'One Size')
+  const hasSizes = availableSizes.length > 0
+  const [size, setSize] = useState(hasSizes ? null : 'One Size')  // null when sizes exist; 'One Size' when none
+  const [sizeChosen, setSizeChosen] = useState(false)  // track explicit selection
   const [quantity, setQuantity] = useState(1)
   const [error, setError] = useState('')
   const [added, setAdded] = useState(false)
@@ -29,11 +31,24 @@ export function ProductPurchasePanel({ product, selectedColor }) {
     return variantMap[normalized] || null
   }, [color, variantMap])
 
+  // Use the variant's price when it has one, otherwise fall back to the product price
+  const effectivePrice = useMemo(() => {
+    const variantPrice = variant?.price ? Number.parseFloat(variant.price) : null
+    return variantPrice > 0 ? variantPrice : Number.parseFloat(product.price || 0)
+  }, [variant, product.price])
+
   useEffect(() => {
     if (!openCartAtCountRef.current || totalItems < openCartAtCountRef.current) return
     window.dispatchEvent(new CustomEvent('storefront:open-cart'))
     openCartAtCountRef.current = null
   }, [totalItems])
+
+  // Reset quantity if it exceeds the new variant's stock
+  useEffect(() => {
+    if (variant && quantity > variant.stock) {
+      setQuantity(1)
+    }
+  }, [variant?.id])
 
   const add = () => {
     if (product.is_sold_out) {
@@ -41,15 +56,27 @@ export function ProductPurchasePanel({ product, selectedColor }) {
       return false
     }
 
-    // ✅ NEW: Validate variant exists
-    if (!variant) {
-      setError(`Color variant not available: ${color}`)
+    // Validate color/variant is selected
+    if (!color || !variant) {
+      setError('Please select a colour.')
       return false
     }
 
     // ✅ NEW: Check stock per variant
     if (variant.stock <= 0) {
       setError(`${color} is currently out of stock.`)
+      return false
+    }
+
+    if (quantity > variant.stock) {
+      setError(`Only ${variant.stock} in stock for ${color}.`)
+      setQuantity(variant.stock)
+      return false
+    }
+
+    // Validate size is explicitly chosen when product has sizes
+    if (hasSizes && !sizeChosen) {
+      setError('Choose a size before adding this piece.')
       return false
     }
 
@@ -62,8 +89,11 @@ export function ProductPurchasePanel({ product, selectedColor }) {
     addToCart(product, {
       size,
       color,
-      variantId: variant.id,    // ✅ NEW: Pass variant ID
-      sku: variant.sku,          // ✅ NEW: Pass SKU
+      variantId: variant.id,
+      sku: variant.sku,
+      price: effectivePrice,
+      image: variant.images?.[0] || product.images?.[0] || null,
+      stock: variant.stock,  // so the cart can enforce the cap
       quantity,
     })
     setAdded(true)
@@ -87,7 +117,7 @@ export function ProductPurchasePanel({ product, selectedColor }) {
       <p className="text-xs font-semibold uppercase tracking-[0.2em] text-text-secondary">{product.category}</p>
       <h1 className="mt-2 font-display text-2xl sm:text-3xl lg:text-4xl leading-tight text-text-primary lg:mt-3">{product.title}</h1>
       <div className="mt-2 sm:mt-3 flex items-baseline gap-3">
-        <p className="text-lg sm:text-xl font-semibold text-rose-400">{formatPrice(product.price)}</p>
+        <p className="text-lg sm:text-xl font-semibold text-rose-400">{formatPrice(effectivePrice)}</p>
         {product.compare_at_price && Number(product.compare_at_price) > Number(product.price) && (
           <p className="text-sm sm:text-base text-text-light line-through">{formatPrice(product.compare_at_price)}</p>
         )}
@@ -119,6 +149,7 @@ export function ProductPurchasePanel({ product, selectedColor }) {
               key={option}
               onClick={() => {
                 setSize(option)
+                setSizeChosen(true)
                 setError('')
               }}
               className={`border rounded-md px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium transition-all duration-200 ${size === option ? 'border-rose-400 bg-rose-50 text-rose-400' : 'border-border-light bg-cream-50 text-text-primary hover:border-rose-250 hover:bg-rose-50'}`}
@@ -147,9 +178,9 @@ export function ProductPurchasePanel({ product, selectedColor }) {
           <span className="w-8 sm:w-10 text-center text-xs sm:text-sm font-medium text-text-primary border-l border-r border-border-light">{quantity}</span>
           <button 
             className="px-2 sm:px-3 py-1.5 transition-colors hover:bg-cream-200 disabled:cursor-not-allowed disabled:opacity-50" 
-            onClick={() => setQuantity(quantity + 1)} 
+            onClick={() => setQuantity(Math.min(variant?.stock ?? Infinity, quantity + 1))} 
             aria-label="Increase quantity"
-            disabled={product.is_sold_out}
+            disabled={product.is_sold_out || (variant ? quantity >= variant.stock : false)}
           >
             <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-text-primary" />
           </button>
@@ -171,7 +202,7 @@ export function ProductPurchasePanel({ product, selectedColor }) {
             aria-live="polite"
           >
             <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5" />
-            {added ? 'Added to bag' : `Add to bag — ${formatPrice(Number(product.price) * quantity)}`}
+            {added ? 'Added to bag' : `Add to bag — ${formatPrice(effectivePrice * quantity)}`}
           </button>
         )}
         {added && <p className="mt-1.5 text-center text-xs font-semibold uppercase tracking-[0.16em] text-rose-400">Opening your bag...</p>}

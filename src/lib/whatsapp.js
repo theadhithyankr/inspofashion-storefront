@@ -19,13 +19,21 @@ export function formatCartMessage(cartItems, totalPrice, customerData) {
 
   const itemsText = cartItems
     .map((item, index) => {
-      const color = item.color ? `, Color: ${item.color}` : ''
-      const image = item.imageUrl ? `\n   Image: ${item.imageUrl}` : ''
-      return `${index + 1}. ${item.quantity}x ${item.title} (Size: ${item.size}${color}, Rs. ${item.price.toFixed(2)} each)${image}`
+      const lineTotal = (item.quantity * item.price).toFixed(2)
+      const unitPrice = item.price.toFixed(2)
+      const sku = item.sku ? `\n   SKU: ${item.sku}` : ''
+      const color = item.color ? `\n   Color: ${item.color}` : ''
+      const size = item.size ? `\n   Size: ${item.size}` : ''
+      const pricing = `\n   Unit Price: Rs. ${unitPrice}\n   Line Total: Rs. ${lineTotal}`
+      
+      return `${index + 1}. ${item.title}${color}${size}${sku}\n   Qty: ${item.quantity}${pricing}`
     })
     .join('\n\n')
 
-  return `New order request\n\nCustomer details:\nName: ${customerData.name.trim()}\nPhone: ${normalizePhoneNumber(customerData.phone)}\nAddress: ${customerData.address.trim()}, ${customerData.city.trim()}, ${customerData.state.trim()} - ${customerData.pincode.trim()}\n\nOrder items:\n${itemsText}\n\nTotal amount: Rs. ${totalPrice.toFixed(0)}`
+  // Compute total from items to ensure exact match with cart subtotal (sum of item.price * item.quantity)
+  const calculatedTotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)
+
+  return `New order request\n\nCustomer details:\nName: ${customerData.name.trim()}\nPhone: ${normalizePhoneNumber(customerData.phone)}\nAddress: ${customerData.address.trim()}, ${customerData.city.trim()}, ${customerData.state.trim()} - ${customerData.pincode.trim()}\n\nOrder items:\n${itemsText}\n\nTotal amount: Rs. ${calculatedTotal}`
 }
 
 export function generateWhatsAppUrl(phoneNumber, message) {
