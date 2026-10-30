@@ -8,7 +8,7 @@ import { CartProvider, useCart } from './cart-context'
 import { CartDrawer } from './cart-drawer'
 import { sanitizeUrl } from '@/lib/format'
 
-function Header({ menu, general, products, collections, onCartClick }) {
+function Header({ menu, general, products, onCartClick }) {
   const router = useRouter()
   const { totalItems } = useCart()
   const [menuOpen, setMenuOpen] = useState(false)
@@ -17,12 +17,16 @@ function Header({ menu, general, products, collections, onCartClick }) {
   const [scrolled, setScrolled] = useState(false)
   const searchInputRef = useRef(null)
 
-  const navLinks = menu?.links?.length
-    ? menu.links
-    : collections.slice(0, 5).map((collection) => ({
-        name: collection.name,
-        url: `/collections/${collection.slug}`,
-      }))
+  // Build navigation with hardcoded Inspo Fashions structure
+  const defaultNavLinks = [
+    { name: 'Home', url: '/' },
+    { name: 'Nighties', url: '/collections/nighties' },
+    { name: 'Frock Nighties', url: '/collections/frock-nighties' },
+    { name: 'New Arrivals', url: '/search?sort=newest' },
+    { name: 'About Us', url: '/about' },
+  ]
+
+  const navLinks = menu?.links?.length ? menu.links : defaultNavLinks
 
   const suggestions = useMemo(() => {
     const term = query.trim().toLowerCase()
@@ -86,7 +90,7 @@ function Header({ menu, general, products, collections, onCartClick }) {
 
             {/* Desktop Navigation - Center */}
             <nav className="hidden lg:flex items-center gap-16 flex-1 justify-center">
-              {navLinks.slice(0, 3).map((link) => (
+              {navLinks.slice(0, 5).map((link) => (
                 <Link 
                   key={`${link.name}-${link.url}`} 
                   href={sanitizeUrl(link.url)} 

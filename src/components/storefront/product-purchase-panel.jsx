@@ -26,9 +26,22 @@ export function ProductPurchasePanel({ product, selectedColor }) {
   // ✅ NEW: Get variant metadata
   const variantMap = useMemo(() => product.variantMap || {}, [product.variantMap])
   const variant = useMemo(() => {
-    if (!color) return null
+    console.log('[ProductPurchasePanel] Looking up variant for color:', color)
+    console.log('[ProductPurchasePanel] variantMap:', variantMap)
+    console.log('[ProductPurchasePanel] Available colors in map:', Object.keys(variantMap))
+    
+    if (!color) {
+      console.log('[ProductPurchasePanel] No color selected')
+      return null
+    }
+    
     const normalized = normalizeColorForCompare(color)
-    return variantMap[normalized] || null
+    console.log('[ProductPurchasePanel] Normalized color:', normalized)
+    
+    const result = variantMap[normalized] || null
+    console.log('[ProductPurchasePanel] Variant found:', result)
+    
+    return result
   }, [color, variantMap])
 
   // Use the variant's price when it has one, otherwise fall back to the product price

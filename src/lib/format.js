@@ -228,42 +228,77 @@ export function clampText(value = '', fallback = '') {
   return value?.toString().trim() || fallback
 }
 
-/**
- * Create a normalized map of color names to variant metadata
- * Enables efficient color → variant lookups
- * @param {object[]} variants - Array of variant objects
- * @returns {object} Map of normalized color names to variant metadata
- */
 export function createVariantMap(variants = []) {
   const map = {}
   
-  if (!Array.isArray(variants)) return map
+  console.log('[Variant Map] Input variants:', variants)
   
-  variants.forEach((variant) => {
-    if (!variant) return
+  if (!Array.isArray(variants)) {
+    console.warn('[Variant Map] variants is not an array:', typeof variants)
+    return map
+  }
+  
+  if (variants.length === 0) {
+    console.warn('[Variant Map] No variants provided')
+    return map
+  }
+  
+  variants.forEach((variant, idx) => {
+    if (!variant) {
+      console.warn(`[Variant Map] Variant ${idx} is null/undefined`)
+      return
+    }
+    
+    console.log(`[Variant Map] Processing variant ${idx}:`, variant)
     
     // Check multiple possible color field names from database
-    const colorName = variant.color_name || variant.color || variant.name || variant.option1 || ''
-    if (!colorName) return
+    const colorName = (
+      variant.color_name || 
+      variant.color || 
+      variant.name || 
+      variant.option1 || 
+      variant.option1_value ||
+      variant.title ||
+      variant.variant_title ||
+      ''
+    ).toString().trim()
+    
+    console.log(`[Variant Map] Variant ${idx} - colorName:`, colorName)
+    
+    if (!colorName) {
+      console.warn(`[Variant Map] Variant ${idx} missing color information. Available fields:`, Object.keys(variant))
+      return
+    }
     
     const normalized = compactColorName(colorName)
-    if (!normalized) return
+    console.log(`[Variant Map] Variant ${idx} - normalized color:`, normalized)
+    
+    if (!normalized) {
+      console.warn(`[Variant Map] Variant ${idx} - normalization failed`)
+      return
+    }
     
     // Store variant metadata keyed by normalized color name
-    // variant_images is the Supabase column; fall back to variant.images for legacy data
-    // stock_quantity is the Supabase column; fall back to variant.stock for legacy data
-    const variantImages = variant.variant_images ?? variant.images
-    const variantStock = variant.stock_quantity ?? variant.stock ?? 0
-    map[normalized] = {
+    const variantImages = variant.variant_images ?? variant.images ?? variant.image_url ?? null
+    const variantStock = variant.stock_quantity ?? variant.stock ?? variant.quantity ?? 0
+    
+    const mapEntry = {
       id: variant.id,
       color: colorName,
       color_code: variant.color_code || null,
       sku: variant.sku || null,
-      stock: variantStock,
-      images: Array.isArray(variantImages) ? variantImages : [],
+      stock: Number(variantStock) || 0,
+      images: Array.isArray(variantImages) ? variantImages : (variantImages ? [variantImages] : []),
       price: variant.price || null,
     }
+    
+    console.log(`[Variant Map] Variant ${idx} - stored entry:`, mapEntry)
+    
+    map[normalized] = mapEntry
   })
+  
+  console.log('[Variant Map] Final map:', map)
+  console.log('[Variant Map] Map keys:', Object.keys(map))
   
   return map
 }
