@@ -44,11 +44,28 @@ export function ProductPurchasePanel({ product, selectedColor }) {
     return result
   }, [color, variantMap])
 
+  // True when the product has product_variants rows at all. Products created
+  // before the variant system have none: they are bought at product level.
+  const hasVariantCatalog = Object.keys(variantMap).length > 0
+
   // Use the variant's price when it has one, otherwise fall back to the product price
   const effectivePrice = useMemo(() => {
     const variantPrice = variant?.price ? Number.parseFloat(variant.price) : null
     return variantPrice > 0 ? variantPrice : Number.parseFloat(product.price || 0)
   }, [variant, product.price])
+
+  // Stock cap for this selection: the selected variant's stock when one exists,
+  // otherwise a product-level fallback (max variant stock, or product quantity
+  // for legacy products without variants).
+  const effectiveStock = useMemo(() => {
+    if (variant) return variant.stock
+    const variantRows = product.variants || []
+    if (variantRows.length > 0) {
+      return Math.max(0, ...variantRows.map((v) => Number(v.stock_quantity ?? v.stock ?? 0)))
+    }
+    const quantity = Number(product.quantity)
+    return Number.isFinite(quantity) ? quantity : 0
+  }, [variant, product.variants, product.quantity])
 
   useEffect(() => {
     if (!openCartAtCountRef.current || totalItems < openCartAtCountRef.current) return
@@ -56,12 +73,12 @@ export function ProductPurchasePanel({ product, selectedColor }) {
     openCartAtCountRef.current = null
   }, [totalItems])
 
-  // Reset quantity if it exceeds the new variant's stock
+  // Reset quantity if it exceeds the available stock
   useEffect(() => {
-    if (variant && quantity > variant.stock) {
+    if (effectiveStock > 0 && quantity > effectiveStock) {
       setQuantity(1)
     }
-  }, [variant?.id])
+  }, [variant?.id, effectiveStock])
 
   const add = () => {
     if (product.is_sold_out) {
@@ -69,21 +86,26 @@ export function ProductPurchasePanel({ product, selectedColor }) {
       return false
     }
 
-    // Validate color/variant is selected
-    if (!color || !variant) {
-      setError('Please select a colour.')
-      return false
-    }
+    // Colour/variant validation only applies to products that have variants.
+    if (hasVariantCatalog) {
+      if (!color || !variant) {
+        setError('Please select a colour.')
+        return false
+      }
 
-    // ✅ NEW: Check stock per variant
-    if (variant.stock <= 0) {
-      setError(`${color} is currently out of stock.`)
-      return false
-    }
+      if (variant.stock <= 0) {
+        setError(`${color} is currently out of stock.`)
+        return false
+      }
 
-    if (quantity > variant.stock) {
-      setError(`Only ${variant.stock} in stock for ${color}.`)
-      setQuantity(variant.stock)
+      if (quantity > variant.stock) {
+        setError(`Only ${variant.stock} in stock for ${color}.`)
+        setQuantity(variant.stock)
+        return false
+      }
+    } else if (effectiveStock > 0 && quantity > effectiveStock) {
+      setError(`Only ${effectiveStock} in stock.`)
+      setQuantity(effectiveStock)
       return false
     }
 
@@ -102,11 +124,12 @@ export function ProductPurchasePanel({ product, selectedColor }) {
     addToCart(product, {
       size,
       color,
-      variantId: variant.id,
-      sku: variant.sku,
+      variantId: variant?.id ?? null,
+      sku: variant?.sku ?? null,
       price: effectivePrice,
-      image: variant.images?.[0] || product.images?.[0] || null,
-      stock: variant.stock,  // so the cart can enforce the cap
+      // The cart falls back to color_image_map / product images when this is null.
+      image: variant?.images?.[0] || null,
+      stock: effectiveStock,  // so the cart can enforce the cap
       quantity,
     })
     setAdded(true)
@@ -191,9 +214,9 @@ export function ProductPurchasePanel({ product, selectedColor }) {
           <span className="w-8 sm:w-10 text-center text-xs sm:text-sm font-medium text-text-primary border-l border-r border-border-light">{quantity}</span>
           <button 
             className="px-2 sm:px-3 py-1.5 transition-colors hover:bg-cream-200 disabled:cursor-not-allowed disabled:opacity-50" 
-            onClick={() => setQuantity(Math.min(variant?.stock ?? Infinity, quantity + 1))} 
+            onClick={() => setQuantity(Math.min(effectiveStock > 0 ? effectiveStock : Infinity, quantity + 1))} 
             aria-label="Increase quantity"
-            disabled={product.is_sold_out || (variant ? quantity >= variant.stock : false)}
+            disabled={product.is_sold_out || (effectiveStock > 0 ? quantity >= effectiveStock : false)}
           >
             <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-text-primary" />
           </button>
@@ -201,12 +224,12 @@ export function ProductPurchasePanel({ product, selectedColor }) {
       </div>
 
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border-light bg-white/98 px-4 py-2.5 shadow-md backdrop-blur-sm sm:px-6 sm:py-3 lg:static lg:mt-6 lg:border-0 lg:bg-transparent lg:px-0 lg:py-0 lg:shadow-none">
-        {product.is_sold_out || !variant || variant.stock === 0 ? (
+        {product.is_sold_out || effectiveStock <= 0 || (hasVariantCatalog && !variant) ? (
           <button
             disabled
             className="flex w-full items-center justify-center gap-2 px-4 py-2.5 sm:px-6 sm:py-3 font-semibold text-xs sm:text-sm uppercase tracking-[0.16em] text-white bg-text-light/60 cursor-not-allowed rounded-md"
           >
-            {!variant ? 'Color Not Available' : 'Out of Stock'}
+            {hasVariantCatalog && !variant ? 'Color Not Available' : 'Out of Stock'}
           </button>
         ) : (
           <button

@@ -41,7 +41,7 @@ export default async function ProductPage({ params }) {
   // If at least one variant has stock > 0, the product is in stock.
   // If all variants have stock = 0 (or no variants), use product-level is_sold_out.
   const hasVariantsInStock = product.variants?.length > 0
-    ? product.variants.some((v) => v.stock > 0)
+    ? product.variants.some((v) => Number(v.stock_quantity ?? v.stock ?? 0) > 0)
     : false
   const availability = hasVariantsInStock || !product.is_sold_out
     ? 'https://schema.org/InStock'
